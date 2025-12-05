@@ -1,0 +1,51 @@
+# Dependencias
+# Ignora la carpeta que contiene todos los paquetes de npm/yarn/pnpm.
+/node_modules
+
+# Build
+# Ignora la carpeta de compilación de Next.js.
+/.next/
+
+# Ignora la carpeta de exportación estática.
+/out/
+
+# Archivos de entorno
+# Ignora las variables de entorno locales que pueden contener claves secretas. [5, 7]
+# Es una buena práctica mantener .env, .env.development y .env.production en el repositorio si contienen configuraciones por defecto no sensibles. [11]
+.env.local
+.env.development.local
+.env.production.local
+
+# Logs
+# Ignora los registros de errores y depuración.
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Archivos de TypeScript
+# Ignora el archivo de declaración de tipos autogenerado por Next.js.
+next-env.d.ts
+
+# Ignora la información de compilación incremental de TypeScript.
+*.tsbuildinfo
+
+# Despliegue en Vercel
+# Ignora la carpeta de configuración y despliegue de Vercel.
+.vercel/
+
+# Archivos del sistema operativo y editores
+# Ignora los archivos de metadatos de macOS.
+.DS_Store
+
+# Ignora los archivos de configuración de VSCode, excepto las extensiones recomendadas.
+.vscode/*
+!.vscode/extensions.json
+
+# Archivos de prueba
+# Ignora la carpeta de reportes de cobertura de pruebas.
+/coverage
+
+# Archivos misceláneos
+# Ignora archivos de certificados SSL privados.
+*.pem
