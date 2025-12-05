@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 const menuItems = [
   {
     title: "Inventario",
-    href: "/admin/inventory",
+    href: "/",
     icon: Package,
   },
   {
