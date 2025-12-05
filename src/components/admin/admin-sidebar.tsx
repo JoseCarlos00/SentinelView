@@ -24,7 +24,7 @@ export function AdminSidebar() {
   return (
     <aside className="w-64 border-r border-sidebar-border bg-sidebar">
       <div className="flex h-16 items-center border-b border-sidebar-border px-6">
-        <h1 className="text-lg font-semibold text-sidebar-foreground">Panel Admin</h1>
+        <h1 className="text-lg font-semibold text-sidebar-foreground"><Link href="/">Panel Admin</Link></h1>
       </div>
       <nav className="space-y-1 p-4">
         {menuItems.map((item) => {

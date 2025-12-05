@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Activity, Bell, LogOut, MoreVertical, RefreshCw, Search, Wifi, WifiOff, Zap } from "lucide-react"
+import Link from "next/link"
 
 // Mock data types
 type Device = {
@@ -110,6 +111,7 @@ export default function AlertScannerDashboard() {
               <Activity className="h-6 w-6 text-primary-foreground" />
             </div>
             <h1 className="text-2xl font-semibold text-foreground">AlertScanner Control</h1>
+            <h3><Link href="/admin/users">Administrador de Usuarios</Link></h3>
           </div>
 
           <div className="flex items-center gap-4">
