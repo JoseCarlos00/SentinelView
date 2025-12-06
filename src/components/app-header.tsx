@@ -1,7 +1,25 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { Activity, LogOut } from 'lucide-react';
+import { logout } from '@/modules/auth/logout';
+import { useRouter } from 'next/navigation';
+
 
 export default function InventoryHeader({ currentUser }: { currentUser: { name: string; role: string } }) {
+	const router = useRouter();
+
+	const handleClickLogout = async () => {
+		await logout();
+
+		// 1. Elimina el token de la cookie
+		document.cookie = 'jwt-access-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+		//2. Redirige al login y refresca la página
+		router.push('/');
+		router.refresh(); //
+	};
+
+
 	return (
 		<header className='flex h-16 items-center border-b border-border bg-card px-6'>
 			<div className='flex items-center justify-between px-6 py-4 w-full max-w-7xl mx-auto'>
@@ -19,7 +37,8 @@ export default function InventoryHeader({ currentUser }: { currentUser: { name: 
 							{currentUser.name} · {currentUser.role}
 						</p>
 					</div>
-					<Button
+					<Button 
+						onClick={handleClickLogout}
 						variant='outline'
 						size='sm'
 					>

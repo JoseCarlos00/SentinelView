@@ -11,7 +11,7 @@ interface DashboardProps {
   // Aquí va el contenido estático renderizado por el Server Component
   children: React.ReactNode; 
   // La información del usuario necesaria para la lógica de la UI y los sockets
-  currentUser: { name: string; role: string }; 
+  currentUser: { username: string; role: string }; 
 }
 
 // *** Componente Cliente (Contenedor de Interactividad) ***
