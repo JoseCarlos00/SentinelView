@@ -1,8 +1,8 @@
 import type React from 'react';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import { AdminSidebar } from '@/components/page-sidebar';
-import InventoryHeader from '@/components/page-header';
+import { AdminSidebar } from '@/components/app-sidebar';
+import InventoryHeader from '@/components/app-header';
 import { ScrollArea } from "@/components/ui/scroll-area"
 // @ts-ignore
 import './globals.css';
@@ -14,24 +14,6 @@ export const metadata: Metadata = {
 	// <CHANGE> Updated metadata for AlertScanner dashboard
 	title: 'AlertScanner Control | Dashboard Operacional',
 	description: 'Dashboard de control operacional para monitoreo y gestión de dispositivos de red',
-	generator: 'v0.app',
-	icons: {
-		icon: [
-			{
-				url: '/icon-light-32x32.png',
-				media: '(prefers-color-scheme: light)',
-			},
-			{
-				url: '/icon-dark-32x32.png',
-				media: '(prefers-color-scheme: dark)',
-			},
-			{
-				url: '/icon.svg',
-				type: 'image/svg+xml',
-			},
-		],
-		apple: '/apple-icon.png',
-	},
 };
 
 export default function RootLayout({
