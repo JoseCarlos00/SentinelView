@@ -1,6 +1,6 @@
 import type React from "react"
-import { AppSidebar } from "@/components/app-sidebar"
-import { AppHeader } from "@/components/app-header"
+import  AppSidebar  from "@/components/AdminSidebar"
+import  AppHeader  from "@/components/AppHeader"
 
 export default function ProtectedLayout({
   children,
@@ -11,7 +11,7 @@ export default function ProtectedLayout({
     <div className="flex min-h-screen bg-background">
       <AppSidebar />
       <div className="flex-1 flex flex-col">
-        <AppHeader />
+        <AppHeader currentUser={{ name: "Admin Protect", role: "SUPER_ADMIN" }}/>
         <main className="flex-1 p-6">{children}</main>
       </div>
     </div>

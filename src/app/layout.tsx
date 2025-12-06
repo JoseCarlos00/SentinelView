@@ -1,8 +1,8 @@
 import type React from 'react';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import { AdminSidebar } from '@/components/app-sidebar';
-import InventoryHeader from '@/components/app-header';
+import AdminSidebar from '@/components/AdminSidebar';
+import InventoryHeader from '@/components/AppHeader';
 import { ScrollArea } from "@/components/ui/scroll-area"
 // @ts-ignore
 import './globals.css';

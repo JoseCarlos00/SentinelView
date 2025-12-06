@@ -18,7 +18,7 @@ const menuItems = [
   },
 ]
 
-export function AdminSidebar() {
+export default function AdminSidebar() {
   const pathname = usePathname()
 
   return (
