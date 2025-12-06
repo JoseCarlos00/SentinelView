@@ -6,7 +6,7 @@ import { logout } from '@/modules/auth/logout';
 import { useRouter } from 'next/navigation';
 
 
-export default function InventoryHeader({ currentUser }: { currentUser: { name: string; role: string } }) {
+export default function InventoryHeader({ currentUser }: { currentUser: { username: string; role: string } }) {
 	const router = useRouter();
 
 	const handleClickLogout = async () => {
@@ -34,10 +34,10 @@ export default function InventoryHeader({ currentUser }: { currentUser: { name: 
 					<div className='text-right'>
 						<p className='text-sm text-muted-foreground'>Usuario</p>
 						<p className='text-sm font-medium text-foreground'>
-							{currentUser.name} · {currentUser.role}
+							{currentUser.username} · {currentUser.role}
 						</p>
 					</div>
-					<Button 
+					<Button
 						onClick={handleClickLogout}
 						variant='outline'
 						size='sm'

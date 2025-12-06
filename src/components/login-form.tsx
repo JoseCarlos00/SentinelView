@@ -22,7 +22,7 @@ export function LoginForm() {
 		setError(null);
 
 		try {
-			const res = await fetch('http://localhost:5000/api/auth/login', {
+			const res = await fetch('http://localhost:9001/api/auth/login', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -45,13 +45,8 @@ export function LoginForm() {
 			// 2. El backend ahora es responsable de establecer AMBAS cookies:
 			// - 'jwt-refresh-token' (httpOnly)
 			// - 'jwt-access-token' (accesible por el servidor)
-			// Ya no es necesario establecer la cookie del access token desde el cliente.
-			// document.cookie = `jwt-access-token=${data.accessToken}; path=/;`;
-
-			// 3. Redirige al dashboard. Esto fuerza una recarga y permite que el middleware
-			// detecte la nueva cookie de sesión (refreshToken).
 			router.push('/');
-			router.refresh(); // Asegura que el estado del servidor se actualice.
+			router.refresh();
 
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error inesperado';

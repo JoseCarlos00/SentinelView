@@ -1,22 +1,26 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Device } from '@/types/devices';
+import { REFRESH_TOKEN_COOKIE_NAME, ACCESS_TOKEN_COOKIE_NAME } from './constants';
 
-/**
- * Intenta refrescar el Access Token en el servidor.
- * Asume que el backend espera el Refresh Token en una cookie HttpOnly.
- * @returns El nuevo accessToken si el refresco es exitoso, o null si falla.
- */
-async function refreshTokenOnServer(): Promise<string | null> {
+interface RefreshResult {
+	newAccessToken: string | null;
+	newCookies: string | null; // Para almacenar el encabezado 'set-cookie'
+}
+
+
+export async function refreshTokenOnServer(): Promise<RefreshResult> {
 	const cookieStore = await cookies();
-	const BACKEND_URL = process.env.BACKEND_API_URL || 'http://localhost:5000';
+	const BACKEND_URL = process.env.BACKEND_API_URL || 'http://localhost:9001';
 
-	// Next.js 'fetch' en el servidor no envía cookies automáticamente.
-	// Debemos pasarlas manualmente para que el backend pueda validar el refresh token.
 	const requestHeaders = new Headers();
-	const refreshTokenCookie = cookieStore.get('jwt-refresh-token'); // Nombre de la cookie del refresh token
+	const refreshTokenCookie = cookieStore.get(REFRESH_TOKEN_COOKIE_NAME);
+
 	if (refreshTokenCookie) {
 		requestHeaders.set('Cookie', `${refreshTokenCookie.name}=${refreshTokenCookie.value}`);
+	} else {
+		// Si no hay refresh token, no hay nada que hacer.
+		return { newAccessToken: null, newCookies: null };
 	}
 
 	try {
@@ -25,18 +29,32 @@ async function refreshTokenOnServer(): Promise<string | null> {
 			headers: requestHeaders,
 		});
 
-		if (!res.ok) return null;
+		if (!res.ok) {
+			console.log('Refresh token is invalid or expired. Clearing auth cookies.');
+			// Si el refresco falla, el backend no envió cookies válidas.
+			// Limpiamos las cookies existentes para forzar un logout.
+			cookieStore.delete(REFRESH_TOKEN_COOKIE_NAME);
+			cookieStore.delete(ACCESS_TOKEN_COOKIE_NAME);
+			return { newAccessToken: null, newCookies: null };
+		}
 
 		const data = await res.json();
 		const newAccessToken = data.accessToken;
 
-		// Actualiza la cookie del access token para las siguientes peticiones en el servidor
-		cookieStore.set('jwt-access-token', newAccessToken, { path: '/' });
+		// ¡Este es el cambio clave!
+		// Capturamos los encabezados 'set-cookie' de la respuesta del backend.
+		// Pueden ser múltiples, por lo que los manejamos como un array.
+		const newCookiesHeader = res.headers.getSetCookie();
 
-		return newAccessToken;
+		// Ya no establecemos la cookie manualmente aquí.
+		// Devolvemos el token y los encabezados para que el llamador (middleware) los gestione.
+		return {
+			newAccessToken: newAccessToken,
+			newCookies: newCookiesHeader.length > 0 ? newCookiesHeader.join(', ') : null,
+		};
 	} catch (error) {
 		console.error('Server-side refresh token failed:', error);
-		return null;
+		return { newAccessToken: null, newCookies: null };
 	}
 }
 
@@ -66,10 +84,10 @@ export async function fetchInventoryData(accessToken: string): Promise<Device[]>
 
 		if (newAccessToken) {
 			console.log('Token refreshed successfully. Retrying original request...');
-			response = await fetchWithToken(newAccessToken);
+			response = await fetchWithToken(newAccessToken.newAccessToken as string);
 		} else {
 			console.log('Failed to refresh token. Redirecting to login.');
-			redirect('/login?expired=true');
+			redirect('/login?error=session_expired');
 		}
 	}
 
@@ -114,17 +132,18 @@ export async function getAuthDataFromServer() {
 	// Esto es crucial para la primera carga después del login.
 	if (!accessToken) {
 		console.log('No access token found, attempting server-side refresh...');
-		const newAccessToken = await refreshTokenOnServer();
-		if (newAccessToken) {
+		const res = await refreshTokenOnServer();
+		if (res.newAccessToken) {
 			console.log('Server-side refresh successful.');
-			accessToken = newAccessToken;
+			accessToken = res.newAccessToken;
 		}
 	}
 
 	// Si después de intentar el refresco, seguimos sin token, redirigimos al login.
 	// Esto cubre sesiones expiradas o inválidas.
 	if (!accessToken) {
-		redirect('/login'); // Redirige si no hay token (aunque el middleware debería hacerlo)
+		// Añadimos un parámetro para indicar al proxy que no vuelva a redirigir.
+		redirect('/login?error=session_expired');
 	}
 
 	// Decodificar el nuevo token (sin validarlo, sólo leer payload)
