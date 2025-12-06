@@ -1,6 +1,6 @@
 import type React from "react"
-import  AppSidebar  from "@/components/AdminSidebar"
-import  AppHeader  from "@/components/AppHeader"
+import  AppSidebar  from "@/components/admin-sidebar"
+import  AppHeader  from "@/components/app-header"
 
 export default function ProtectedLayout({
   children,
