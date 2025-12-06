@@ -2,33 +2,92 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Device } from '@/types/devices';
 
+/**
+ * Intenta refrescar el Access Token en el servidor.
+ * Asume que el backend espera el Refresh Token en una cookie HttpOnly.
+ * @returns El nuevo accessToken si el refresco es exitoso, o null si falla.
+ */
+async function refreshTokenOnServer(): Promise<string | null> {
+	const cookieStore = await cookies();
+	const BACKEND_URL = process.env.BACKEND_API_URL || 'http://localhost:3000';
+
+	// Next.js 'fetch' en el servidor no envía cookies automáticamente.
+	// Debemos pasarlas manualmente para que el backend pueda validar el refresh token.
+	const requestHeaders = new Headers();
+	const refreshTokenCookie = cookieStore.get('jwt-refresh-token'); // Asegúrate que el nombre sea correcto
+	if (refreshTokenCookie) {
+		requestHeaders.set('Cookie', `${refreshTokenCookie.name}=${refreshTokenCookie.value}`);
+	}
+
+	try {
+		const res = await fetch(`${BACKEND_URL}/api/auth/refresh`, {
+			method: 'POST',
+			headers: requestHeaders,
+		});
+
+		if (!res.ok) return null;
+
+		const data = await res.json();
+		const newAccessToken = data.accessToken;
+
+		// Actualiza la cookie del access token para las siguientes peticiones en el servidor
+		cookieStore.set('jwt-access-token', newAccessToken, { path: '/' });
+
+		return newAccessToken;
+	} catch (error) {
+		console.error('Server-side refresh token failed:', error);
+		return null;
+	}
+}
+
 /** * Función ASÍNCRONA para obtener el inventario de la API.
  * Aquí puedes usar claves secretas sin exponerlas al cliente.
  */
 export async function fetchInventoryData(accessToken: string): Promise<Device[]> {
 	const BACKEND_URL = process.env.BACKEND_API_URL || 'http://localhost:3000';
 
+	const fetchWithToken = async (token: string) => {
+		return await fetch(`${BACKEND_URL}/api/inventory/devices`, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${token}`, // Token seguro
+				'Content-Type': 'application/json',
+			},
+			// Desactiva el cache para datos operativos en tiempo real (opcional)
+			cache: 'no-store',
+		});
+	};
+
+	let response = await fetchWithToken(accessToken);
+
+	if (response.status === 401) {
+		console.log('Access token expired. Attempting to refresh on the server...');
+		const newAccessToken = await refreshTokenOnServer();
+
+		if (newAccessToken) {
+			console.log('Token refreshed successfully. Retrying original request...');
+			response = await fetchWithToken(newAccessToken);
+		} else {
+			console.log('Failed to refresh token. Redirecting to login.');
+			redirect('/login?expired=true');
+		}
+	}
+
 	try {
-		// const response = await fetch(`${BACKEND_URL}/api/inventory/devices`, {
-		// 	method: 'GET',
-		// 	headers: {
-		// 		Authorization: `Bearer ${accessToken}`, // Token seguro
-		// 		'Content-Type': 'application/json',
-		// 	},
-		// 	// Desactiva el cache para datos operativos en tiempo real (opcional)
-		// 	cache: 'no-store',
-		// });
+		if (!response.ok) {
+			throw new Error(`Fallo al obtener datos: ${response.status}`);
+		}
 
-		// if (response.status === 401) {
-		// 	// Si el Access Token expira, podrías intentar refrescarlo aquí o redirigir
-		// 	redirect('/login?expired=true');
-		// }
+		return response.json();
+	} catch (error) {
+		console.error('Error fetching inventory:', error);
+		// En caso de error, devuelve un array vacío o datos mock de seguridad
+		return [];
+	}
+}
 
-		// if (!response.ok) {
-		// 	throw new Error(`Fallo al obtener datos: ${response.status}`);
-		// }
-
-		// return response.json();
+export async function fetchInventoryDataTest(accessToken: string): Promise<Device[]> {
+	try {
 		return [
 			{ id: '1', alias: 'Router Principal', ip: '192.168.1.1', status: 'connected', userRole: 'ADMIN' },
 			{ id: '2', alias: 'Switch Core', ip: '192.168.1.10', status: 'connected', userRole: 'OPERATOR' },
