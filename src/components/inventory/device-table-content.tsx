@@ -13,6 +13,21 @@ import { Device } from '@/types/devices'
 
 // Este componente recibe los datos directamente del Server Component Padre
 export default function DeviceTableContent({ devices }: { devices: Device[] }) {
+
+	if (devices.length === 0) {
+		return (
+			<Card>
+				<CardHeader>
+					<CardTitle className='text-xl'>Inventario de Dispositivos</CardTitle>
+					<CardDescription>Gestión y monitoreo de dispositivos en red</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<p className='text-center text-sm text-muted-foreground'>No se encontraron dispositivos en el inventario.</p>
+				</CardContent>
+			</Card>
+		);
+	}
+	
 	return (
 		<Card>
 			<CardHeader>

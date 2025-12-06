@@ -1,19 +1,24 @@
-import type React from "react"
-import  AppSidebar  from "@/components/admin-sidebar"
-import  AppHeader  from "@/components/app-header"
+import type React from 'react';
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import AdminSidebar from '@/components/admin-sidebar';
+import InventoryHeader from '@/components/app-header';
+import { ScrollArea } from "@/components/ui/scroll-area"
 
-export default function ProtectedLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <div className="flex min-h-screen bg-background">
-      <AppSidebar />
-      <div className="flex-1 flex flex-col">
-        <AppHeader currentUser={{ name: "Admin Protect", role: "SUPER_ADMIN" }}/>
-        <main className="flex-1 p-6">{children}</main>
-      </div>
-    </div>
-  )
+export default function HomePageLayout({
+	children,
+}: Readonly<{
+	children: React.ReactNode;
+}>) {
+	return (
+		<div className='flex h-screen'>
+			<AdminSidebar />
+			<div className='flex flex-1 flex-col overflow-hidden'>
+				<InventoryHeader currentUser={{ name: 'Admin', role: 'SUPER_ADMIN' }} />
+				<ScrollArea className='flex-1 overflow-y-auto'>
+					<main className='flex-1 overflow-y-auto p-6'>{children}</main>
+				</ScrollArea>
+			</div>
+		</div>
+	);
 }

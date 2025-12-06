@@ -9,7 +9,7 @@ import { Device } from '@/types/devices';
  */
 async function refreshTokenOnServer(): Promise<string | null> {
 	const cookieStore = await cookies();
-	const BACKEND_URL = process.env.BACKEND_API_URL || 'http://localhost:3000';
+	const BACKEND_URL = process.env.BACKEND_API_URL || 'http://localhost:5000';
 
 	// Next.js 'fetch' en el servidor no envía cookies automáticamente.
 	// Debemos pasarlas manualmente para que el backend pueda validar el refresh token.

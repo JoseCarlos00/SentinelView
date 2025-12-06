@@ -12,7 +12,7 @@ export async function middleware(req: NextRequest) {
 
 	// Si el usuario tiene un token pero intenta acceder al login, redirigir al dashboard
 	if (refreshToken && pathname === '/login') {
-		return NextResponse.redirect(new URL('/dashboard', req.url));
+		return NextResponse.redirect(new URL('/', req.url));
 	}
 
 	return NextResponse.next();

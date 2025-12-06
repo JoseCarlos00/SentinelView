@@ -1,17 +1,26 @@
-export default function HomePage() {
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Bienvenido al Panel de Control de SentinelView</h1>
-        <p className="text-muted-foreground mt-2">
-          Este es el dashboard principal donde podrás ver métricas y estadísticas importantes. El contenido específico
-          se agregará próximamente.
-        </p>
-      </div>
+import AlertScannerDashboard from '@/components/alert-scanner-dashboard';
+import DeviceTableContent from '@/components/inventory/device-table-content';
+import { fetchInventoryData, getAuthDataFromServer } from '@/lib/server-utils'; // Funciones creadas en la respuesta anterior
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {/* Espacio reservado para futuras métricas y widgets */}
-      </div>
-    </div>
-  )
+export default async function DashboardPage() {
+	// 1. Obtiene de forma SEGURA el Access Token y la información del usuario
+	// const { accessToken, currentUser } = getAuthDataFromServer();
+  const { accessToken } = await getAuthDataFromServer();
+  const currentUser = { name: 'Admin', role: 'SUPER_ADMIN' };
+
+
+	// 2. Obtiene los datos de inventario con el token (en el servidor)
+	const initialDevices = await fetchInventoryData(accessToken);
+
+	console.log('Initial:', {accessToken, currentUser});
+	
+	return (
+		// 3. El componente Cliente (AlertScannerDashboard) envuelve al Server Component (DeviceTableContent)
+		<AlertScannerDashboard currentUser={currentUser}>
+			{/* El Server Component DeviceTableContent se renderiza a HTML 
+        antes de que AlertScannerDashboard se 'hidrate' en el cliente.
+      */}
+			<DeviceTableContent devices={initialDevices} />
+		</AlertScannerDashboard>
+	);
 }
