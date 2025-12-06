@@ -1,33 +1,24 @@
-import { NextResponse } from 'next/server';
-// import { verifyToken } from './modules/auth/verify-token';
+import { NextResponse } from "next/server"
 
-export function middleware(req) {
-	const token = req.cookies.get('token')?.value;
-	const url = req.nextUrl.clone();
+export async function middleware(req: any) {
+	const access = req.cookies.get('accessToken');
 
-	// rutas que requieren login
-	const protectedPaths = ['/admin', '/inventory'];
-	const isProtected = protectedPaths.some((path) => url.pathname.startsWith(path));
+	// si no hay token, intentamos refresh
+	if (!access) {
+		const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh`, {
+			method: 'POST',
+			credentials: 'include',
+			headers: { cookie: req.headers.get('cookie') || '' },
+		});
 
-	if (isProtected && !token) {
-		url.pathname = '/login';
-		return NextResponse.redirect(url);
-	}
-
-	// control por rol
-	const adminOnly = ['/admin'];
-	if (token && adminOnly.some((path) => url.pathname.startsWith(path))) {
-		// const payload = verifyToken(token);
-    const payload = { role: 'user' }; // Mocked payload for demonstration
-		if (payload.role !== 'admin') {
-			url.pathname = '/login';
-			return NextResponse.redirect(url);
+		if (refreshRes.ok) {
+			const data = await refreshRes.json();
+			// colocas accessToken en cookie temporal (si quieres SSR)
+			const response = NextResponse.next();
+			response.cookies.set('accessToken', data.accessToken);
+			return response;
 		}
 	}
 
 	return NextResponse.next();
 }
-
-export const config = {
-	matcher: ['/admin/:path*', '/inventory/:path*'],
-};
