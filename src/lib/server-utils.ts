@@ -14,7 +14,7 @@ async function refreshTokenOnServer(): Promise<string | null> {
 	// Next.js 'fetch' en el servidor no envía cookies automáticamente.
 	// Debemos pasarlas manualmente para que el backend pueda validar el refresh token.
 	const requestHeaders = new Headers();
-	const refreshTokenCookie = cookieStore.get('jwt-refresh-token'); // Asegúrate que el nombre sea correcto
+	const refreshTokenCookie = cookieStore.get('jwt-refresh-token'); // Nombre de la cookie del refresh token
 	if (refreshTokenCookie) {
 		requestHeaders.set('Cookie', `${refreshTokenCookie.name}=${refreshTokenCookie.value}`);
 	}
@@ -44,7 +44,7 @@ async function refreshTokenOnServer(): Promise<string | null> {
  * Aquí puedes usar claves secretas sin exponerlas al cliente.
  */
 export async function fetchInventoryData(accessToken: string): Promise<Device[]> {
-	const BACKEND_URL = process.env.BACKEND_API_URL || 'http://localhost:3000';
+	const BACKEND_URL = process.env.BACKEND_API_URL || 'http://localhost:5000';
 
 	const fetchWithToken = async (token: string) => {
 		return await fetch(`${BACKEND_URL}/api/inventory/devices`, {
@@ -108,16 +108,27 @@ export async function fetchInventoryDataTest(accessToken: string): Promise<Devic
  */
 export async function getAuthDataFromServer() {
 	const cookieStore = await cookies();
-	// Reemplaza 'jwt-access-token' por el nombre real de tu cookie de token
-	const accessToken = cookieStore.get('jwt-access-token')?.value || null;
+	let accessToken = cookieStore.get('jwt-access-token')?.value;
 
-	// Si el rol está codificado en la cookie, también lo obtendrías aquí.
-	// Por simplicidad, asumiremos que el rol viene del componente que maneja la sesión.
-	// **NOTA:** Para la seguridad total, el *middleware* ya debería haber verificado esto.
+	// Si no hay Access Token, intenta refrescarlo en el servidor.
+	// Esto es crucial para la primera carga después del login.
+	if (!accessToken) {
+		console.log('No access token found, attempting server-side refresh...');
+		const newAccessToken = await refreshTokenOnServer();
+		if (newAccessToken) {
+			console.log('Server-side refresh successful.');
+			accessToken = newAccessToken;
+		}
+	}
 
+	// Si después de intentar el refresco, seguimos sin token, redirigimos al login.
+	// Esto cubre sesiones expiradas o inválidas.
 	if (!accessToken) {
 		redirect('/login'); // Redirige si no hay token (aunque el middleware debería hacerlo)
 	}
 
-	return { accessToken };
+	// Decodificar el nuevo token (sin validarlo, sólo leer payload)
+	const decoded = JSON.parse(atob(accessToken.split('.')[1]));
+
+	return { accessToken: accessToken, currentUser: { username: decoded.username, role: decoded.role, id: decoded.id } };
 }

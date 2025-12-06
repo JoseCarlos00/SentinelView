@@ -1,43 +1,62 @@
 'use client';
 
 import type React from 'react';
-
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/hooks/use-auth'
+import { useAuth } from '@/hooks/use-auth';
 
 export function LoginForm() {
-	const [email, setEmail] = useState('');
+	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const router = useRouter();
 
 	const handleSubmit = async (e: React.FormEvent) => {
-		try {
-			e.preventDefault();
-			setIsLoading(true);
+		e.preventDefault();
+		setIsLoading(true);
+		setError(null);
 
-			// TODO: Implementar lógica de autenticación
-			console.log('Login attempt:', { email, password });
-      fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username: email, password }),
-      }).then(async (res) => {
-        if (!res.ok) {
-          throw new Error('Credenciales inválidas');
-        }
-        const data = await res.json();
-        console.log('Login successful, access token:', data.accessToken);
-        // Aquí podrías guardar el token en el estado global o en una cookie
-        useAuth.getState().setToken(data.accessToken);
-      });
+		try {
+			const res = await fetch('http://localhost:5000/api/auth/login', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				credentials: 'include', // <-- AÑADIR ESTA LÍNEA
+				body: JSON.stringify({ username: username, password }),
+			});
+
+			if (!res.ok) {
+				const errorData = await res.json();
+				throw new Error(errorData.message || 'Credenciales inválidas');
+			}
+
+			const data = await res.json();
+			console.log('Login successful, access token:', data.accessToken);
+
+			// 1. Guarda el token en el store de Zustand para peticiones del lado del cliente.
+			useAuth.getState().setToken(data.accessToken);
+
+			// 2. El backend ahora es responsable de establecer AMBAS cookies:
+			// - 'jwt-refresh-token' (httpOnly)
+			// - 'jwt-access-token' (accesible por el servidor)
+			// Ya no es necesario establecer la cookie del access token desde el cliente.
+			// document.cookie = `jwt-access-token=${data.accessToken}; path=/;`;
+
+			// 3. Redirige al dashboard. Esto fuerza una recarga y permite que el middleware
+			// detecte la nueva cookie de sesión (refreshToken).
+			router.push('/');
+			router.refresh(); // Asegura que el estado del servidor se actualice.
+
 		} catch (error) {
-			console.error('Error:', error);
+			const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error inesperado';
+			console.error('Error en el login:', errorMessage);
+			setError(errorMessage);
 		} finally {
 			setIsLoading(false);
 		}
@@ -60,8 +79,8 @@ export function LoginForm() {
 							id='username'
 							type='username'
 							placeholder='usuario'
-							value={email}
-							onChange={(e) => setEmail(e.target.value)}
+							value={username}
+							onChange={(e) => setUsername(e.target.value)}
 							required
 							disabled={isLoading}
 						/>
@@ -78,6 +97,7 @@ export function LoginForm() {
 							disabled={isLoading}
 						/>
 					</div>
+					{error && <p className='text-sm text-red-500'>{error}</p>}
 					<Button
 						type='submit'
 						className='w-full'
