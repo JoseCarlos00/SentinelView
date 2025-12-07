@@ -1,16 +1,34 @@
+'use client';
+
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 import { Device } from '@/types/devices'
-import ClientActionsMenu from './client-action-menu'
-import { Badge } from '../ui/badge'
-import { WifiOff, Wifi } from 'lucide-react'
+
+import { columns, DeviceTable } from '@/components/inventory/table/columns';
+import { DataTable } from '@/components/inventory/table/data-table';
 
 
 // Este componente recibe los datos directamente del Server Component Padre
 export default function DeviceTableContent({ devices }: { devices: Device[] }) {
-	
+	const [searchTerm, setSearchTerm] = useState('');
+	const [statusFilter, setStatusFilter] = useState<string>('all');
+
+	// Filter devices
+	const filteredDevices = devices.filter((device) => {
+		const lowerCaseSearchTerm = searchTerm.toLowerCase();
+		const matchesSearch =
+			device.usuario.toLowerCase().includes(lowerCaseSearchTerm) ||
+			device.ip.includes(searchTerm) ||
+			(device.aliasUsuario && device.aliasUsuario.toLowerCase().includes(lowerCaseSearchTerm)) ||
+			device.equipo.toLowerCase().includes(lowerCaseSearchTerm);
+		const status = device.isConnected ? 'connected' : 'disconnected';
+		const matchesStatus = statusFilter === 'all' || status === statusFilter;
+		return matchesSearch && matchesStatus;
+	});
+
 	if (devices.length === 0) {
 		return (
 			<Card>
@@ -24,70 +42,42 @@ export default function DeviceTableContent({ devices }: { devices: Device[] }) {
 			</Card>
 		);
 	}
-	
+
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle className='text-xl'>Inventario de Dispositivos (Cargado en Servidor)</CardTitle>
 				<CardDescription>Gestión y monitoreo de dispositivos en red</CardDescription>
+				{/* Filters and Search */}
+				<div className='mb-4 flex gap-4'>
+					<div className='relative flex-1'>
+						<Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+						<Input
+							placeholder='Buscar por nombre o IP...'
+							value={searchTerm}
+							onChange={(e) => setSearchTerm(e.target.value)}
+							className='pl-10'
+						/>
+					</div>
+
+					<Select
+						value={statusFilter}
+						onValueChange={setStatusFilter}
+					>
+						<SelectTrigger className='w-48'>
+							<SelectValue placeholder='Filtrar por estado' />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value='all'>Todos los estados</SelectItem>
+							<SelectItem value='connected'>Conectados</SelectItem>
+							<SelectItem value='disconnected'>Desconectados</SelectItem>
+						</SelectContent>
+					</Select>
+				</div>
 			</CardHeader>
 			<CardContent>
-				{/* *** NOTA: Filtros y Dropdowns se gestionan en el Cliente (Paso 3) ***
-                  La tabla aquí es SÓLO el marcado HTML con los datos inyectados.
-                */}
-				<div className='rounded-md border border-border'>
-					<Table>
-						<TableHeader>
-							<TableRow>
-								<TableHead>Equipo</TableHead>
-								<TableHead>Modelo</TableHead>
-								<TableHead>Usuario</TableHead>
-								<TableHead>Correo</TableHead>
-								<TableHead>Alias</TableHead>
-								<TableHead>IP</TableHead>
-								<TableHead>Estado de Conexión</TableHead>
-
-								<TableHead className='text-right'>Acciones</TableHead>
-							</TableRow>
-						</TableHeader>
-
-						<TableBody>
-							{devices.map((device) => (
-								<TableRow key={device.id}>
-									<TableCell>{device.modelo}</TableCell>
-									<TableCell>{device.equipo}</TableCell>
-									<TableCell className='font-medium'>{device.usuario}</TableCell>
-									<TableCell>{device.correo}</TableCell>
-									<TableCell>{device.aliasUsuario}</TableCell>
-									<TableCell>{device.ip}</TableCell>
-
-									<TableCell>
-										{device.isConnected === true ? (
-											<Badge
-												variant='outline'
-												className='border-green-500 text-green-500'
-											>
-												<Wifi className='mr-1 h-3 w-3' />
-												Conectado
-											</Badge>
-										) : (
-											<Badge
-												variant='outline'
-												className='border-red-500 text-red-500'
-											>
-												<WifiOff className='mr-1 h-3 w-3' />
-												Desconectado
-											</Badge>
-										)}
-									</TableCell>
-
-									<TableCell className='text-right'>
-										<ClientActionsMenu device={device} />
-									</TableCell>
-								</TableRow>
-							))}
-						</TableBody>
-					</Table>
+				{/* Device Table */}
+				<div className='rounded-md border border-border max-h-[60vh] overflow-x-hidden overflow-y-auto'>
+					<DataTable columns={columns} data={filteredDevices} />
 				</div>
 			</CardContent>
 		</Card>

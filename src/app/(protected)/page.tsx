@@ -25,7 +25,7 @@ const devicesMock = [
 		aliasUsuario: 'Edith Ortega',
 		ip: '192.168.15.174',
 		macAddress: 'D0:4E:50:F8:5F:28',
-		isConnected: false,
+		isConnected: true,
 	},
 	{
 		id: 'index-4',
@@ -37,7 +37,7 @@ const devicesMock = [
 		aliasUsuario: 'Jorgue Ezpinoza Martinez',
 		ip: '192.168.15.175',
 		macAddress: 'D0:4E:50:F8:5F:62',
-		isConnected: false,
+		isConnected: true,
 	},
 	{
 		id: 'index-5',
@@ -85,7 +85,7 @@ const devicesMock = [
 		aliasUsuario: 'Angel Rodrigo Rocha Martinez',
 		ip: '192.168.15.179',
 		macAddress: 'D0:4E:50:F8:67:DC',
-		isConnected: false,
+		isConnected: true,
 	},
 	{
 		id: 'index-9',
