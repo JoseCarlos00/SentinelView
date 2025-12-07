@@ -31,7 +31,13 @@ const format = winston.format.combine(
 	winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
 	// El formato para la consola incluye colores.
 	winston.format.colorize({ all: true }),
-	winston.format.printf((info) => `${info.timestamp} [${info.module || 'SYSTEM'}] ${info.level}: ${info.message}`)
+	winston.format.printf((info) => {
+		const { timestamp, level, message, module, ...meta } = info;
+		const metaString = Object.keys(meta).length ? JSON.stringify(meta, null, 2) : '';
+		return `${timestamp} [${module || 'SYSTEM'}] ${level}: ${message} ${
+			metaString ? `\n${metaString}` : ''
+		}`;
+	})
 );
 
 // Define los "transportes" (dónde se guardarán los logs).
@@ -72,7 +78,7 @@ const Logger = winston.createLogger({
 export const socketLogger = Logger.child({ module: 'SOCKET' });
 export const apiLogger = Logger.child({ module: 'API' });
 export const authLogger = Logger.child({ module: 'AUTH' });
-export const clientLogger = Logger.child({ module: 'CLIENT' });
+export const clientLogger = Logger.child({ module: 'CLIENT_WEB' });
 
 
 export default Logger;

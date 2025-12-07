@@ -1,7 +1,6 @@
 'use client';
 
 import type React from 'react';
-import Cookies from 'js-cookie';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
 import { login } from '@/modules/auth/login';
+import { logClient } from "@/lib/client-logger";
 
 export function LoginForm() {
 	const [username, setUsername] = useState('');
@@ -43,7 +43,13 @@ export function LoginForm() {
 				error instanceof Error && error.message === 'Credenciales inválidas'
 					? 'El usuario o la contraseña son incorrectos.'
 					: 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo.';
-			console.error('Error en el login:', errorMessage);
+
+			// Usamos el clientLogger para enviar el error al servidor.
+			logClient('warn', 'Intento de login fallido', {
+				username,
+				error: error instanceof Error ? error.message : String(error),
+			});
+
 			setError(errorMessage);
 		} finally {
 			setIsLoading(false);
