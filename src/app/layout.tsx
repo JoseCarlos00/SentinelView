@@ -23,7 +23,12 @@ export default function RootLayout({
 			lang='es'
 			className='dark'
 		>
-			<body className={`font-sans antialiased`}>
+			{/* Añadimos suppressHydrationWarning para evitar errores de hidratación
+          causados por extensiones del navegador que modifican el DOM. */}
+			<body
+				className={`font-sans antialiased`}
+				suppressHydrationWarning
+			>
 				<div className='dark min-h-screen bg-background'>
 					{children}
 				</div>

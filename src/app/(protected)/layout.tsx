@@ -19,7 +19,7 @@ export default async function ProtectedLayout({
 			{/* 2. El componente de sincronización se renderiza pero no es visible.
 			       Su única función es pasar el token al cliente para actualizar Zustand. */}
 			<AuthStateSync accessToken={accessToken} />
-			<AdminSidebar />
+			<AdminSidebar currentUser={{ username: currentUser.username, role: currentUser.role }} />
 			<div className='flex flex-1 flex-col overflow-hidden'>
 				{/* 3. Pasamos los datos del usuario al header. */}
 				<InventoryHeader currentUser={{ username: currentUser.username, role: currentUser.role }} />
