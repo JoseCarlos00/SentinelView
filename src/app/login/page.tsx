@@ -1,5 +1,6 @@
 import { LoginForm } from '@/components/login-form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { use } from 'react';
 import { Terminal } from 'lucide-react';
 
 // Define una interfaz para los parámetros de búsqueda que esperas
@@ -10,11 +11,13 @@ interface LoginPageProps {
 	};
 }
 
-// 1. Acepta el objeto `searchParams` como prop
-export default async function LoginPage({ searchParams }: LoginPageProps) {
-	// 2. Accede a los valores directamente desde el objeto searchParams
-	const errorMessage = searchParams?.error;
-	const successMessage = searchParams?.message;
+// 1. El componente de página ahora es `async` para poder usar `use()`.
+//    Next.js trata `searchParams` como una Promesa en el servidor.
+export default function LoginPage({ searchParams }: LoginPageProps) {
+	// 2. Usamos `React.use()` para desenvolver la "Promesa" de searchParams.
+	const resolvedSearchParams = use(Promise.resolve(searchParams));
+	const errorMessage = resolvedSearchParams?.error ?? '';
+	const successMessage = resolvedSearchParams?.message ?? '';
 
 	return (
 		<div className='min-h-screen flex items-center justify-center bg-background'>
