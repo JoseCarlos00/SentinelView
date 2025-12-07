@@ -17,6 +17,7 @@ export async function refreshTokenOnServer(): Promise<RefreshResult> {
 	const requestHeaders = new Headers();
 	const refreshTokenCookie = cookieStore.get(REFRESH_TOKEN_COOKIE_NAME);
 
+
 	if (refreshTokenCookie) {
 		requestHeaders.set('Cookie', `${refreshTokenCookie.name}=${refreshTokenCookie.value}`);
 	} else {
@@ -24,18 +25,16 @@ export async function refreshTokenOnServer(): Promise<RefreshResult> {
 		return { newAccessToken: null, newCookies: null };
 	}
 
+
 	try {
 		const res = await fetch(`${BACKEND_URL}/api/auth/refresh`, {
 			method: 'POST',
-			headers: requestHeaders,
-		});
+			headers: requestHeaders		});
 
 		if (!res.ok) {
-			console.log('Refresh token is invalid or expired. Clearing auth cookies.');
-			// Si el refresco falla, el backend no envió cookies válidas.
-			// Limpiamos las cookies existentes para forzar un logout.
-			cookieStore.delete(REFRESH_TOKEN_COOKIE_NAME);
-			cookieStore.delete(ACCESS_TOKEN_COOKIE_NAME);
+			console.error('Fallo al refrescar el token en el servidor. El backend respondió con:', res.status);
+			// No intentamos borrar cookies aquí. Simplemente notificamos el fallo.
+			// El middleware se encargará de la redirección y la limpieza de cookies.
 			return { newAccessToken: null, newCookies: null };
 		}
 
@@ -77,23 +76,6 @@ export async function fetchInventoryData(accessToken: string): Promise<Device[]>
 		}
 
 		return response.json();
-	} catch (error) {
-		console.error('Error fetching inventory:', error);
-		// En caso de error, devuelve un array vacío o datos mock de seguridad
-		return [];
-	}
-}
-
-export async function fetchInventoryDataTest(accessToken: string): Promise<Device[]> {
-	try {
-		return [
-			{ id: '1', alias: 'Router Principal', ip: '192.168.1.1', status: 'connected', userRole: 'ADMIN' },
-			{ id: '2', alias: 'Switch Core', ip: '192.168.1.10', status: 'connected', userRole: 'OPERATOR' },
-			{ id: '3', alias: 'Firewall Gateway', ip: '192.168.1.254', status: 'disconnected', userRole: 'SUPER_ADMIN' },
-			{ id: '4', alias: 'AP Oficina Norte', ip: '192.168.2.1', status: 'connected', userRole: 'OPERATOR' },
-			{ id: '5', alias: 'AP Oficina Sur', ip: '192.168.2.2', status: 'disconnected', userRole: 'OPERATOR' },
-			{ id: '6', alias: 'Server Backup', ip: '192.168.3.50', status: 'connected', userRole: 'ADMIN' },
-		];
 	} catch (error) {
 		console.error('Error fetching inventory:', error);
 		// En caso de error, devuelve un array vacío o datos mock de seguridad

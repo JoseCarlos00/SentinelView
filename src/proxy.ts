@@ -63,10 +63,16 @@ async function handlePageAuth(request: NextRequest) {
 				return response;
 			}
 
-			// 4b. Si el refresco es exitoso, continuar la petición original.
-			//     La respuesta adjuntará las nuevas cookies que nos dio el backend.
-			const response = NextResponse.next();
-			if (newCookies) {
+			// 4b. Si el refresco es exitoso, preparamos la continuación de la petición.
+			//     Primero, creamos una nueva cabecera para la petición que continuará al renderizado.
+			const requestHeaders = new Headers(request.headers);
+			requestHeaders.set('Cookie', `${ACCESS_TOKEN_COOKIE_NAME}=${newAccessToken}`);
+
+			// Creamos una respuesta que continúa a la página solicitada, pero con las cabeceras de la petición actualizadas.
+			const response = NextResponse.next({ request: { headers: requestHeaders } });
+
+			// Adjuntamos a la RESPUESTA las cookies que el backend nos dio para que el NAVEGADOR se actualice.
+			if (newCookies) { // newCookies contiene el string 'Set-Cookie' del backend
 				response.headers.set('Set-Cookie', newCookies);
 			}
 			return response;

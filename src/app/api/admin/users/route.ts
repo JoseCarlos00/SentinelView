@@ -44,9 +44,6 @@ export async function GET() {
 	const cookieStore = await cookies();
 	const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE_NAME)?.value;
 
-	console.log({cookieStore, accessToken});
-	
-
 	try {
 		const backendResponse = await fetch(USERS_API_URL, {
 			headers: {
