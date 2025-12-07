@@ -39,6 +39,7 @@ export default function InventoryHeader({ currentUser }: { currentUser: { userna
 						onClick={handleClickLogout}
 						variant='outline'
 						size='sm'
+						className='cursor-pointer'
 					>
 						<LogOut className='mr-2 h-4 w-4' />
 						Cerrar Sesión
