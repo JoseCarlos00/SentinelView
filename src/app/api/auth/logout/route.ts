@@ -1,43 +1,38 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { REFRESH_TOKEN_COOKIE_NAME, ACCESS_TOKEN_COOKIE_NAME } from '@/lib/constants';
 
 export async function POST(request: Request) {
-	// 1. Obtener la URL del backend desde las variables de entorno.
-	// Es más seguro usar una variable sin el prefijo NEXT_PUBLIC_ ya que esta ruta se ejecuta en el servidor.
 	const BACKEND_URL = process.env.BACKEND_API_URL || 'http://localhost:9001';
 
 	try {
-		// 2. Obtener el cuerpo de la solicitud original (del cliente).
-		const body = await request.json();
+		// 1. Obtener la cookie de refresco de la petición entrante.
+		const cookieStore = await cookies();
+		const refreshToken = cookieStore.get(REFRESH_TOKEN_COOKIE_NAME);
 
-		// 3. Reenviar la solicitud al servidor backend.
-		const backendResponse = await fetch(`${BACKEND_URL}/api/auth/login`, {
+		// 2. Reenviar la solicitud de logout al backend, incluyendo la cookie de refresco.
+		const backendResponse = await fetch(`${BACKEND_URL}/api/auth/logout`, {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json',
+				// Propagamos la cookie para que el backend sepa qué sesión invalidar.
+				Cookie: refreshToken ? `${refreshToken.name}=${refreshToken.value}` : '',
 			},
-			body: JSON.stringify(body),
 		});
 
-		// 4. Leer el cuerpo de la respuesta del backend.
-		const data = await backendResponse.json();
-
-		// Si la respuesta del backend no fue exitosa (ej. 401 Unauthorized),
-		// la reenviamos tal cual al cliente.
+		// 3. Si el backend responde con un error, lo propagamos.
 		if (!backendResponse.ok) {
-			return NextResponse.json(data, { status: backendResponse.status });
+			return NextResponse.json({ message: 'El logout en el backend falló' }, { status: backendResponse.status });
 		}
 
-		// 5. Capturar la cabecera 'Set-Cookie' de la respuesta del backend.
-		const cookies = backendResponse.headers.get('set-cookie');
+		// 4. El backend debería responder con una cabecera para eliminar las cookies.
+		//    Creamos una respuesta para el cliente que replica esta acción.
+		const response = NextResponse.json({ message: 'Logout exitoso' });
+		response.cookies.delete(REFRESH_TOKEN_COOKIE_NAME);
+		response.cookies.delete(ACCESS_TOKEN_COOKIE_NAME);
 
-		// 6. Crear una nueva respuesta para el cliente, incluyendo el cuerpo y la cookie.
-		const response = NextResponse.json(data);
-		if (cookies) {
-			response.headers.set('set-cookie', cookies);
-		}
 		return response;
 	} catch (error) {
-		console.error('Error proxying login request:', error);
-		return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+		console.error('Error en el proxy de logout:', error);
+		return NextResponse.json({ message: 'Error interno del servidor en el proxy de logout' }, { status: 500 });
 	}
 }
