@@ -2,6 +2,8 @@
 # Ignora la carpeta que contiene todos los paquetes de npm/yarn/pnpm.
 /node_modules
 
+/logs/
+*.log
 # Build
 # Ignora la carpeta de compilación de Next.js.
 /.next/
