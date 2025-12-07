@@ -1,21 +1,16 @@
-'use client'
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {  MoreVertical, } from 'lucide-react';
+
 import { Device } from '@/types/devices'
+import ClientActionsMenu from './client-action-menu'
+import { Badge } from '../ui/badge'
+import { WifiOff, Wifi } from 'lucide-react'
 
 
 // Este componente recibe los datos directamente del Server Component Padre
 export default function DeviceTableContent({ devices }: { devices: Device[] }) {
-
+	
 	if (devices.length === 0) {
 		return (
 			<Card>
@@ -42,17 +37,51 @@ export default function DeviceTableContent({ devices }: { devices: Device[] }) {
                 */}
 				<div className='rounded-md border border-border'>
 					<Table>
-						<TableHeader>{/* ... (TableHead con tus encabezados) ... */}</TableHeader>
+						<TableHeader>
+							<TableRow>
+								<TableHead>Equipo</TableHead>
+								<TableHead>Modelo</TableHead>
+								<TableHead>Usuario</TableHead>
+								<TableHead>Correo</TableHead>
+								<TableHead>Alias</TableHead>
+								<TableHead>IP</TableHead>
+								<TableHead>Estado de Conexión</TableHead>
+
+								<TableHead className='text-right'>Acciones</TableHead>
+							</TableRow>
+						</TableHeader>
+
 						<TableBody>
 							{devices.map((device) => (
 								<TableRow key={device.id}>
-									<TableCell className='font-medium'>{device.alias}</TableCell>
-									{/* ... (Otras celdas) ... */}
+									<TableCell>{device.modelo}</TableCell>
+									<TableCell>{device.equipo}</TableCell>
+									<TableCell className='font-medium'>{device.usuario}</TableCell>
+									<TableCell>{device.correo}</TableCell>
+									<TableCell>{device.aliasUsuario}</TableCell>
+									<TableCell>{device.ip}</TableCell>
+
+									<TableCell>
+										{device.isConnected === true ? (
+											<Badge
+												variant='outline'
+												className='border-green-500 text-green-500'
+											>
+												<Wifi className='mr-1 h-3 w-3' />
+												Conectado
+											</Badge>
+										) : (
+											<Badge
+												variant='outline'
+												className='border-red-500 text-red-500'
+											>
+												<WifiOff className='mr-1 h-3 w-3' />
+												Desconectado
+											</Badge>
+										)}
+									</TableCell>
+
 									<TableCell className='text-right'>
-										{/* !!! EXCEPCIÓN IMPORTANTE !!!
-                                            Los botones interactivos deben ser Client Components.
-                                            Pasa funciones o callbacks si necesitas disparar una acción.
-                                        */}
 										<ClientActionsMenu device={device} />
 									</TableCell>
 								</TableRow>
@@ -64,27 +93,3 @@ export default function DeviceTableContent({ devices }: { devices: Device[] }) {
 		</Card>
 	);
 }
-
-// Para que las acciones del menú funcionen (Ping/Alarma), estas deben ser
-// *otro* Client Component anidado, importado en el Server Component.
-// Este pequeño componente manejará el estado y las llamadas de acción.
-const ClientActionsMenu = ({ device }: { device: Device }) => {
-	// ESTE COMPONENTE DEBE TENER 'use client' si manejas el click o el estado del Dropdown
-	return (
-		<DropdownMenu>
-			<DropdownMenuTrigger asChild>
-				<Button
-					variant='ghost'
-					size='sm'
-				>
-					<MoreVertical className='h-4 w-4' />
-				</Button>
-			</DropdownMenuTrigger>
-			<DropdownMenuContent align='end'>
-				<DropdownMenuItem onClick={() => alert(`Enviando PING a ${device.alias}`)}>Enviar PING</DropdownMenuItem>
-			</DropdownMenuContent>
-		</DropdownMenu>
-	);
-};
-
-// Si ClientActionsMenu es un componente aparte, debe tener su propio 'use client'
