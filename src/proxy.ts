@@ -110,6 +110,14 @@ async function handleApiAuth(request: NextRequest) {
 export async function proxy(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
+	// Lista de rutas que no requieren autenticación
+	const publicPaths = ['/login', '/api/auth/login', '/api/log'];
+
+	// Si la ruta está en la lista pública, no hacemos nada
+	if (publicPaths.some((path) => pathname.startsWith(path))) {
+		return NextResponse.next();
+	}
+
 	// Si la ruta es para la API de administración, aplica la lógica de autorización de API.
 	if (pathname.startsWith('/api/admin')) {
 		return handleApiAuth(request);
@@ -121,12 +129,8 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
 	matcher: [
-		/*
-		 * Coincide con todas las rutas excepto las de activos estáticos y la API de autenticación.
-		 * - Primero, el negativo para las rutas que NO queremos que pasen por el middleware.
-		 * - Segundo, el positivo para las rutas de API de admin que SÍ queremos proteger.
-		 */
-		'/((?!_next/static|_next/image|favicon.ico|api/auth).*)',
-		'/api/admin/:path*',
+		// Ejecuta el middleware en todas las rutas excepto las que son para archivos estáticos.
+		// La lógica interna del middleware se encargará de las rutas públicas.
+		'/((?!_next/static|_next/image|favicon.ico).*)',
 	],
 };
