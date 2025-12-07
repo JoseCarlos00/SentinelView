@@ -1,7 +1,9 @@
 'use client'
 
+import { logClient } from '@/lib/client-logger';
+
 export default function ErrorPage({ error }: { error: Error }) {
-  console.error(error);
+	logClient('error', 'PAGE ERROR', { error });
 
   return (
 		<div>

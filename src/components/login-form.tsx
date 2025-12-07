@@ -45,10 +45,7 @@ export function LoginForm() {
 					: 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo.';
 
 			// Usamos el clientLogger para enviar el error al servidor.
-			logClient('warn', 'Intento de login fallido', {
-				username,
-				error: error instanceof Error ? error.message : String(error),
-			});
+			logClient('warn', 'Intento de login fallido', { username, error});
 
 			setError(errorMessage);
 		} finally {

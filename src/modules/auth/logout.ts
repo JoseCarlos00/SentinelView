@@ -9,9 +9,7 @@ export async function logout() {
 			method: 'POST',
 		});
 	} catch (error) {
-		logClient('error', 'La llamada al endpoint de logout falló', {
-			error: error instanceof Error ? error.message : String(error),
-		});
+		logClient('error', 'La llamada al endpoint de logout falló', { error });
 	} finally {
 		useAuth.getState().setToken(null);
 		Cookies.remove(ACCESS_TOKEN_COOKIE_NAME);
