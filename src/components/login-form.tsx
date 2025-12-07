@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
+import { login } from '@/modules/auth/login';
 
 export function LoginForm() {
 	const [username, setUsername] = useState('');
@@ -22,34 +23,22 @@ export function LoginForm() {
 		setError(null);
 
 		try {
-			const res = await fetch('http://localhost:9001/api/auth/login', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				credentials: 'include', // <-- AÑADIR ESTA LÍNEA
-				body: JSON.stringify({ username: username, password }),
-			});
+			// Usamos la función centralizada
+			const accessToken = await login(username, password);
+			console.log('Login successful, access token:', accessToken);
 
-			if (!res.ok) {
-				const errorData = await res.json();
-				throw new Error(errorData.message || 'Credenciales inválidas');
-			}
+			useAuth.getState().setToken(accessToken);
 
-			const data = await res.json();
-			console.log('Login successful, access token:', data.accessToken);
-
-			// 1. Guarda el token en el store de Zustand para peticiones del lado del cliente.
-			useAuth.getState().setToken(data.accessToken);
-
-			// 2. El backend ahora es responsable de establecer AMBAS cookies:
-			// - 'jwt-refresh-token' (httpOnly)
-			// - 'jwt-access-token' (accesible por el servidor)
 			router.push('/');
 			router.refresh();
 
 		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error inesperado';
+			// Proporcionamos un mensaje más amigable y específico.
+			// El error lanzado desde login.ts es 'Credenciales inválidas'.
+			const errorMessage =
+				error instanceof Error && error.message === 'Credenciales inválidas'
+					? 'El usuario o la contraseña son incorrectos.'
+					: 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo.';
 			console.error('Error en el login:', errorMessage);
 			setError(errorMessage);
 		} finally {
