@@ -1,126 +1,70 @@
-import { NextResponse } from "next/server"
+import { ACCESS_TOKEN_COOKIE_NAME } from '@/lib/constants';
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 
-type UserRole = "SUPER_ADMIN" | "ADMIN" | "USER"
+const BACKEND_URL = process.env.BACKEND_API_URL || 'http://localhost:9001';
+const USERS_API_URL = `${BACKEND_URL}/api/admin/users`;
 
-interface User {
-  id: number
-  username: string
-  password: string
-  role: UserRole
+// Función auxiliar para reenviar peticiones al backend
+async function proxyRequest(request: Request) {
+	const cookieStore = await cookies();
+	const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE_NAME)?.value;
+
+	// Preparamos las cabeceras, incluyendo el token de autorización.
+	const headers = new Headers(request.headers);
+	if (accessToken) {
+		headers.set('Authorization', `Bearer ${accessToken}`);
+	}
+
+	try {
+		const backendResponse = await fetch(USERS_API_URL, {
+			method: request.method,
+			headers,
+			// Solo incluimos el cuerpo para métodos que lo permiten (ej. POST)
+			body: request.method !== 'GET' ? await request.blob() : undefined,
+			// Duplex es necesario para enviar un cuerpo con una petición GET/HEAD, aunque aquí lo evitamos.
+			// @ts-ignore
+			duplex: 'half',
+		});
+
+		// Reenviamos la respuesta del backend (cuerpo, estado, cabeceras) al cliente.
+		return new NextResponse(backendResponse.body, {
+			status: backendResponse.status,
+			statusText: backendResponse.statusText,
+			headers: backendResponse.headers,
+		});
+	} catch (error) {
+		console.error(`Error proxying ${request.method} to ${USERS_API_URL}:`, error);
+		return NextResponse.json({ message: 'Error al contactar el servidor backend.' }, { status: 502 }); // 502 Bad Gateway
+	}
 }
-
-// In-memory database simulation
-const users: User[] = [
-  { id: 1, username: "superadmin", password: "password123", role: "SUPER_ADMIN" },
-  { id: 2, username: "admin", password: "password123", role: "ADMIN" },
-  { id: 3, username: "user", password: "password123", role: "USER" },
-]
-
-let nextId = 4
 
 // GET - Retrieve all users
 export async function GET() {
-  // Return users without passwords
-  const safeUsers = users.map(({ password, ...user }) => user)
-  return NextResponse.json(safeUsers)
+	const cookieStore = await cookies();
+	const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE_NAME)?.value;
+
+	console.log({cookieStore, accessToken});
+	
+
+	try {
+		const backendResponse = await fetch(USERS_API_URL, {
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+		});
+
+		const data = await backendResponse.json();
+		console.log(data);
+		
+		return NextResponse.json(data, { status: backendResponse.status });
+	} catch (error) {
+		console.error(`Error proxying GET to ${USERS_API_URL}:`, error);
+		return NextResponse.json({ message: 'Error al contactar el servidor backend.' }, { status: 502 });
+	}
 }
 
 // POST - Create a new user
 export async function POST(request: Request) {
-  try {
-    const body = await request.json()
-    const { username, password, role } = body
-
-    // Validate input
-    if (!username || !password || !role) {
-      return NextResponse.json({ error: "Todos los campos son requeridos" }, { status: 400 })
-    }
-
-    // Validate role
-    const validRoles: UserRole[] = ["SUPER_ADMIN", "ADMIN", "USER"]
-    if (!validRoles.includes(role)) {
-      return NextResponse.json({ error: "Rol inválido" }, { status: 400 })
-    }
-
-    // Check if username already exists
-    if (users.some((u) => u.username === username)) {
-      return NextResponse.json({ error: "El nombre de usuario ya existe" }, { status: 400 })
-    }
-
-    // Create new user
-    const newUser: User = {
-      id: nextId++,
-      username,
-      password,
-      role,
-    }
-
-    users.push(newUser)
-
-    // Return user without password
-    const { password: _, ...safeUser } = newUser
-    return NextResponse.json(safeUser, { status: 201 })
-  } catch (error) {
-    return NextResponse.json({ error: "Error al crear el usuario" }, { status: 500 })
-  }
-}
-
-// PATCH - Update user role
-export async function PATCH(request: Request) {
-  try {
-    const body = await request.json()
-    const { userId, role } = body
-
-    // Validate input
-    if (!userId || !role) {
-      return NextResponse.json({ error: "userId y role son requeridos" }, { status: 400 })
-    }
-
-    // Validate role
-    const validRoles: UserRole[] = ["SUPER_ADMIN", "ADMIN", "USER"]
-    if (!validRoles.includes(role)) {
-      return NextResponse.json({ error: "Rol inválido" }, { status: 400 })
-    }
-
-    // Find user
-    const userIndex = users.findIndex((u) => u.id === userId)
-    if (userIndex === -1) {
-      return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 })
-    }
-
-    // Update role
-    users[userIndex].role = role
-
-    // Return updated user without password
-    const { password: _, ...safeUser } = users[userIndex]
-    return NextResponse.json(safeUser)
-  } catch (error) {
-    return NextResponse.json({ error: "Error al actualizar el usuario" }, { status: 500 })
-  }
-}
-
-// DELETE - Delete a user
-export async function DELETE(request: Request) {
-  try {
-    const body = await request.json()
-    const { userId } = body
-
-    // Validate input
-    if (!userId) {
-      return NextResponse.json({ error: "userId es requerido" }, { status: 400 })
-    }
-
-    // Find user index
-    const userIndex = users.findIndex((u) => u.id === userId)
-    if (userIndex === -1) {
-      return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 })
-    }
-
-    // Remove user
-    users.splice(userIndex, 1)
-
-    return NextResponse.json({ message: "Usuario eliminado con éxito" })
-  } catch (error) {
-    return NextResponse.json({ error: "Error al eliminar el usuario" }, { status: 500 })
-  }
+	return proxyRequest(request);
 }

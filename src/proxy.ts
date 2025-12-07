@@ -1,22 +1,33 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { refreshTokenOnServer } from './lib/server-utils';
-import { REFRESH_TOKEN_COOKIE_NAME, ACCESS_TOKEN_COOKIE_NAME } from './lib/constants';
- 
-// Función para verificar si un token está expirado (simplificada)
-function isTokenExpired(token: string): boolean {
+import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from './lib/constants';
+
+// Función para decodificar el payload de un JWT (sin verificar firma)
+function getPayloadFromToken(token: string) {
 	try {
-		const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-		// Compara la fecha de expiración (en segundos) con la fecha actual.
-		return Date.now() >= payload.exp * 1000;
-	} catch {
-		return true;
+		const payloadBase64 = token.split('.')[1];
+
+		// 1. Decodifica la Base64 URL-safe. Reemplaza '-' por '+' y '_' por '/'
+		// y añade el padding '=' si es necesario, para que Buffer lo decodifique correctamente.
+		const base64 = payloadBase64.replace(/-/g, '+').replace(/_/g, '/');
+
+		// 2. Utiliza Buffer de Node.js para decodificar la Base64
+		const decodedPayloadString = Buffer.from(base64, 'base64').toString('utf8');
+
+		// 3. Parsea la cadena JSON
+		const payload = JSON.parse(decodedPayloadString);
+
+		return payload;
+	} catch (error) {
+		console.error('Error al decodificar el payload del token.', error);
+		return null;
 	}
 }
 
-export async function proxy(request: NextRequest) {
+// Lógica para la autenticación de PÁGINAS
+async function handlePageAuth(request: NextRequest) {
 	const { pathname, searchParams } = request.nextUrl;
-
 	const accessTokenValue = request.cookies.get(ACCESS_TOKEN_COOKIE_NAME)?.value;
 	const refreshTokenValue = request.cookies.get(REFRESH_TOKEN_COOKIE_NAME)?.value;
 
@@ -31,8 +42,11 @@ export async function proxy(request: NextRequest) {
 		return NextResponse.redirect(new URL('/login', request.url));
 	}
 
+	const payload = accessTokenValue ? getPayloadFromToken(accessTokenValue) : null;
+	const isExpired = !payload || Date.now() >= payload.exp * 1000;
+
 	// 3. Si el usuario tiene un access token y no está expirado, permitir el paso.
-	if (accessTokenValue && !isTokenExpired(accessTokenValue)) {
+	if (accessTokenValue && !isExpired) {
 		return NextResponse.next();
 	}
 
@@ -62,21 +76,50 @@ export async function proxy(request: NextRequest) {
 			return NextResponse.redirect(new URL('/login?error=proxy_error', request.url));
 		}
 	}
-	
+
 	return NextResponse.next();
 }
 
-// 5. Configuración del Matcher
-// Esto define en qué rutas se ejecutará el middleware.
+// Lógica para la autorización de RUTAS DE API
+async function handleApiAuth(request: NextRequest) {
+	const accessToken = request.cookies.get(ACCESS_TOKEN_COOKIE_NAME)?.value;
+
+	if (!accessToken) {
+		return NextResponse.json({ message: 'No autenticado: se requiere token de acceso.' }, { status: 401 });
+	}
+
+
+	const payload = getPayloadFromToken(accessToken);
+
+	if (!payload || payload.role !== 'SUPER_ADMIN') {
+		return NextResponse.json({ message: 'Acceso denegado: se requiere rol de SUPER_ADMIN.' }, { status: 403 });
+	}
+
+	return NextResponse.next();
+}
+
+// Esta es la función principal que Next.js ejecutará.
+// Actúa como un despachador que decide qué lógica aplicar según la ruta.
+export async function proxy(request: NextRequest) {
+	const { pathname } = request.nextUrl;
+
+	// Si la ruta es para la API de administración, aplica la lógica de autorización de API.
+	if (pathname.startsWith('/api/admin')) {
+		return handleApiAuth(request);
+	}
+
+	// Para el resto de rutas (páginas), aplica la lógica de autenticación de páginas.
+	return handlePageAuth(request);
+}
+
 export const config = {
 	matcher: [
 		/*
-		 * Coincide con todas las rutas de petición excepto las que empiezan por:
-		 * - api (rutas de API)
-		 * - _next/static (archivos estáticos)
-		 * - _next/image (imágenes optimizadas)
-		 * - favicon.ico (icono de la página)
+		 * Coincide con todas las rutas excepto las de activos estáticos y la API de autenticación.
+		 * - Primero, el negativo para las rutas que NO queremos que pasen por el middleware.
+		 * - Segundo, el positivo para las rutas de API de admin que SÍ queremos proteger.
 		 */
-		'/((?!api|_next/static|_next/image|favicon.ico).*)',
+		'/((?!_next/static|_next/image|favicon.ico|api/auth).*)',
+		'/api/admin/:path*',
 	],
 };

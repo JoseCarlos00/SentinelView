@@ -1,6 +1,6 @@
 import AlertScannerDashboard from '@/components/alert-scanner-dashboard';
 import DeviceTableContent from '@/components/inventory/device-table-content';
-import { fetchInventoryData, getAuthDataFromServer } from '@/lib/server-utils';
+import { fetchInventoryData, fetchInventoryDataTest, getAuthDataFromServer } from '@/lib/server-utils';
 
 export default async function DashboardPage() {
 	// 1. La información del usuario y la sincronización de Zustand ya se manejan en el layout.
@@ -9,7 +9,7 @@ export default async function DashboardPage() {
 	const { accessToken, currentUser } = await getAuthDataFromServer();
 
 	// 2. Obtiene los datos de inventario con el token (en el servidor)
-	const initialDevices = await fetchInventoryData(accessToken);
+	const initialDevices = await fetchInventoryDataTest(accessToken);
 
 	return ( 
 		// 3. El componente Cliente (AlertScannerDashboard) envuelve al Server Component (DeviceTableContent)

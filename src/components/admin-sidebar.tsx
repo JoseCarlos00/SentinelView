@@ -17,7 +17,7 @@ const menuItems = [
     href: '/admin/users',
     icon: Users,
     // Solo los roles en este array pueden ver este elemento.
-    roles: ['SUPER_ADMIN', 'ADMIN'],
+    roles: ['SUPER_ADMIN'],
   },
 ]
 
