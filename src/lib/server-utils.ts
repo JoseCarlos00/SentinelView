@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { cache } from 'react';
 import { Device } from '@/types/devices';
 import { REFRESH_TOKEN_COOKIE_NAME, ACCESS_TOKEN_COOKIE_NAME } from './constants';
 
@@ -62,34 +63,13 @@ export async function refreshTokenOnServer(): Promise<RefreshResult> {
  * Aquí puedes usar claves secretas sin exponerlas al cliente.
  */
 export async function fetchInventoryData(accessToken: string): Promise<Device[]> {
-	const BACKEND_URL = process.env.BACKEND_API_URL || 'http://localhost:5000';
-
-	const fetchWithToken = async (token: string) => {
-		return await fetch(`${BACKEND_URL}/api/inventory/devices`, {
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${token}`, // Token seguro
-				'Content-Type': 'application/json',
-			},
-			// Desactiva el cache para datos operativos en tiempo real (opcional)
-			cache: 'no-store',
-		});
-	};
-
-	let response = await fetchWithToken(accessToken);
-
-	if (response.status === 401) {
-		console.log('Access token expired. Attempting to refresh on the server...');
-		const newAccessToken = await refreshTokenOnServer();
-
-		if (newAccessToken) {
-			console.log('Token refreshed successfully. Retrying original request...');
-			response = await fetchWithToken(newAccessToken.newAccessToken as string);
-		} else {
-			console.log('Failed to refresh token. Redirecting to login.');
-			redirect('/login?error=session_expired');
-		}
-	}
+	const BACKEND_URL = process.env.BACKEND_API_URL || 'http://localhost:9001';
+	// El proxy ya ha garantizado que el accessToken es válido.
+	// No necesitamos la lógica de reintento aquí.
+	const response = await fetch(`${BACKEND_URL}/api/inventory/devices`, {
+		headers: { Authorization: `Bearer ${accessToken}` },
+		cache: 'no-store',
+	});
 
 	try {
 		if (!response.ok) {
@@ -124,25 +104,16 @@ export async function fetchInventoryDataTest(accessToken: string): Promise<Devic
 /** * Función para obtener el token de la cookie (Asume que usas un token de sesión/JWT en cookies).
  * Alternativamente, podrías obtenerlo del AuthContext si usaras sólo un Client Component para todo.
  */
-export async function getAuthDataFromServer() {
+export const getAuthDataFromServer = cache(async () => {
 	const cookieStore = await cookies();
-	let accessToken = cookieStore.get('jwt-access-token')?.value;
+	// El proxy ya ha garantizado que el token existe y es válido.
+	// Simplemente lo leemos.
+	const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE_NAME)?.value;
 
-	// Si no hay Access Token, intenta refrescarlo en el servidor.
-	// Esto es crucial para la primera carga después del login.
+	// Si por alguna razón extrema el token no está (lo cual no debería pasar
+	// si el proxy funciona), redirigimos. Esto es una salvaguarda.
 	if (!accessToken) {
-		console.log('No access token found, attempting server-side refresh...');
-		const res = await refreshTokenOnServer();
-		if (res.newAccessToken) {
-			console.log('Server-side refresh successful.');
-			accessToken = res.newAccessToken;
-		}
-	}
-
-	// Si después de intentar el refresco, seguimos sin token, redirigimos al login.
-	// Esto cubre sesiones expiradas o inválidas.
-	if (!accessToken) {
-		// Añadimos un parámetro para indicar al proxy que no vuelva a redirigir.
+		console.error('getAuthDataFromServer: No access token found after proxy check. Redirecting.');
 		redirect('/login?error=session_expired');
 	}
 
@@ -150,4 +121,4 @@ export async function getAuthDataFromServer() {
 	const decoded = JSON.parse(atob(accessToken.split('.')[1]));
 
 	return { accessToken: accessToken, currentUser: { username: decoded.username, role: decoded.role, id: decoded.id } };
-}
+});
