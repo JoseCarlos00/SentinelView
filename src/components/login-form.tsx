@@ -1,6 +1,7 @@
 'use client';
 
 import type React from 'react';
+import Cookies from 'js-cookie';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,9 @@ export function LoginForm() {
 			const accessToken = await login(username, password);
 			console.log('Login successful, access token:', accessToken);
 
+			// El backend, a través del proxy de Next.js, ya ha establecido las cookies
+			// (accessToken y refreshToken) en el navegador a través de las cabeceras Set-Cookie.
+			// Por lo tanto, ya no es necesario establecer la cookie manualmente aquí.
 			useAuth.getState().setToken(accessToken);
 
 			router.push('/');
