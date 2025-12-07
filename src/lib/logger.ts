@@ -1,23 +1,78 @@
 import winston from 'winston';
+import DailyRotateFile from 'winston-daily-rotate-file';
 
-const logger = winston.createLogger({
-	level: 'info', // Nivel mínimo de log a registrar
-	format: winston.format.combine(
-		winston.format.timestamp({
-			format: 'YYYY-MM-DD HH:mm:ss',
-		}),
-		winston.format.errors({ stack: true }), // Para loguear el stack de errores
-		winston.format.splat(),
-		winston.format.json() // Formato de salida
-	),
-	defaultMeta: { service: 'sentinel-view-app' }, // Metadata por defecto
-	transports: [
-		// Por ahora, solo mostraremos los logs en la consola.
-		// En producción, podrías añadir transportes para archivos o servicios externos.
-		new winston.transports.Console({
-			format: winston.format.simple(),
-		}),
-	],
+// Define los niveles de severidad de los logs.
+const levels = {
+	error: 0,
+	warn: 1,
+	info: 2,
+	http: 3,
+	debug: 4,
+};
+
+// Determina el nivel de logging según el entorno.
+const level = () => {
+	const env = process.env.NODE_ENV || 'development';
+	return env === 'development' ? 'debug' : 'warn';
+};
+
+// Define los colores para cada nivel (útil en la consola).
+const colors = {
+	error: 'red',
+	warn: 'yellow',
+	info: 'green',
+	http: 'magenta',
+	debug: 'white',
+};
+winston.addColors(colors);
+
+// Define el formato de los logs.
+const format = winston.format.combine(
+	winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
+	// El formato para la consola incluye colores.
+	winston.format.colorize({ all: true }),
+	winston.format.printf((info) => `${info.timestamp} [${info.module || 'SYSTEM'}] ${info.level}: ${info.message}`)
+);
+
+// Define los "transportes" (dónde se guardarán los logs).
+const transports = [
+	// Transporte para la consola.
+	new winston.transports.Console(),
+
+	// Transporte para rotar los logs de errores.
+	new DailyRotateFile({
+		level: 'error',
+		filename: 'logs/error-%DATE%.log', // Patrón del nombre de archivo. %DATE% será reemplazado.
+		datePattern: 'YYYY-MM-DD', // El formato de la fecha.
+		zippedArchive: true, // Comprime los archivos de log antiguos.
+		maxSize: '20m', // Rota el archivo si alcanza los 20MB.
+		maxFiles: '14d', // Elimina los logs después de 14 días.
+		format: winston.format.uncolorize(), // Guarda en el archivo sin colores.
+	}),
+	// Transporte para rotar todos los logs (desde el nivel configurado hacia arriba).
+	new DailyRotateFile({
+		filename: 'logs/combined-%DATE%.log',
+		datePattern: 'YYYY-MM-DD',
+		zippedArchive: true,
+		maxSize: '20m',
+		maxFiles: '14d',
+		format: winston.format.uncolorize(), // Guarda en el archivo sin colores.
+	}),
+];
+
+// Crea y exporta la instancia del logger.
+const Logger = winston.createLogger({
+	level: level(),
+	levels,
+	format,
+	transports,
 });
 
-export default logger;
+// Loggers específicos
+export const socketLogger = Logger.child({ module: 'SOCKET' });
+export const apiLogger = Logger.child({ module: 'API' });
+export const authLogger = Logger.child({ module: 'AUTH' });
+export const clientLogger = Logger.child({ module: 'CLIENT' });
+
+
+export default Logger;

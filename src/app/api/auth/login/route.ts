@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { authLogger as logger } from '@/lib/logger';
 
 export async function POST(request: Request) {
 	// 1. Obtener la URL del backend desde las variables de entorno.
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
 		}
 		return response;
 	} catch (error) {
-		console.error('Error proxying login request:', error);
+		logger.error('Error en el proxy de login:', { error });
 		return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
 	}
 }

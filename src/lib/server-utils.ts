@@ -2,7 +2,8 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { cache } from 'react';
 import { Device } from '@/types/devices';
-import { REFRESH_TOKEN_COOKIE_NAME, ACCESS_TOKEN_COOKIE_NAME } from './constants';
+import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from './constants';
+import { apiLogger, authLogger as logger } from './logger';
 
 interface RefreshResult {
 	newAccessToken: string | null;
@@ -17,7 +18,6 @@ export async function refreshTokenOnServer(): Promise<RefreshResult> {
 	const requestHeaders = new Headers();
 	const refreshTokenCookie = cookieStore.get(REFRESH_TOKEN_COOKIE_NAME);
 
-
 	if (refreshTokenCookie) {
 		requestHeaders.set('Cookie', `${refreshTokenCookie.name}=${refreshTokenCookie.value}`);
 	} else {
@@ -25,14 +25,14 @@ export async function refreshTokenOnServer(): Promise<RefreshResult> {
 		return { newAccessToken: null, newCookies: null };
 	}
 
-
 	try {
 		const res = await fetch(`${BACKEND_URL}/api/auth/refresh`, {
 			method: 'POST',
-			headers: requestHeaders		});
+			headers: requestHeaders,
+		});
 
 		if (!res.ok) {
-			console.error('Fallo al refrescar el token en el servidor. El backend respondió con:', res.status);
+			logger.warn('Fallo al refrescar el token en el servidor. El backend respondió con:', { status: res.status });
 			// No intentamos borrar cookies aquí. Simplemente notificamos el fallo.
 			// El middleware se encargará de la redirección y la limpieza de cookies.
 			return { newAccessToken: null, newCookies: null };
@@ -53,7 +53,7 @@ export async function refreshTokenOnServer(): Promise<RefreshResult> {
 			newCookies: newCookiesHeader.length > 0 ? newCookiesHeader.join(', ') : null,
 		};
 	} catch (error) {
-		console.error('Server-side refresh token failed:', error);
+		logger.error('El refresco de token en el servidor falló por una excepción.', { error });
 		return { newAccessToken: null, newCookies: null };
 	}
 }
@@ -77,7 +77,7 @@ export async function fetchInventoryData(accessToken: string): Promise<Device[]>
 
 		return response.json();
 	} catch (error) {
-		console.error('Error fetching inventory:', error);
+		apiLogger.error('Error al obtener el inventario.', { error });
 		// En caso de error, devuelve un array vacío o datos mock de seguridad
 		return [];
 	}
@@ -95,7 +95,7 @@ export const getAuthDataFromServer = cache(async () => {
 	// Si por alguna razón extrema el token no está (lo cual no debería pasar
 	// si el proxy funciona), redirigimos. Esto es una salvaguarda.
 	if (!accessToken) {
-		console.error('getAuthDataFromServer: No access token found after proxy check. Redirecting.');
+		logger.error('getAuthDataFromServer: No se encontró accessToken después del chequeo del proxy. Redirigiendo.');
 		redirect('/login?error=session_expired');
 	}
 

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import logger from './lib/logger';
+import { authLogger as logger } from './lib/logger';
 import { refreshTokenOnServer } from './lib/server-utils';
 import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from './lib/constants';
 
