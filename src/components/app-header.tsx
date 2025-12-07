@@ -5,18 +5,16 @@ import { Activity, LogOut } from 'lucide-react';
 import { logout } from '@/modules/auth/logout';
 import { useRouter } from 'next/navigation';
 
-
 export default function InventoryHeader({ currentUser }: { currentUser: { username: string; role: string } }) {
 	const router = useRouter();
 
 	const handleClickLogout = async () => {
+		// 1. Llama a la función centralizada de logout.
 		await logout();
 
-		// 1. Elimina el token de la cookie
-		document.cookie = 'jwt-access-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-		//2. Redirige al login y refresca la página
-		router.push('/');
-		router.refresh(); //
+		// 2. Redirige al usuario a la página de login con un mensaje de éxito.
+		router.push('/login?message=logout_success');
+		router.refresh();
 	};
 
 
