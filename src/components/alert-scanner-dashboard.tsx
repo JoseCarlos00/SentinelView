@@ -29,12 +29,8 @@ export default function AlertScannerDashboard({ children, currentUser }: Dashboa
         <div className="min-h-screen bg-background p-6">
             {/* ... (Header, Sidebar, y Métricas del Dashboard, adaptadas o extraídas) ... */}
 
-            {/* Botón de acción sensible al rol */}
-            {isSuperAdmin && (
-                <Button className="w-full mb-4" onClick={() => {console.log('Sync Master Inventory')}}>
-                    Sincronizar Inventario Maestro
-                </Button>
-            )}
+           <label>Mostrar Metricas</label>
+            
 
             {/* 2. El children (El contenido de la tabla de dispositivos) inyectado aquí */}
             <div className="mx-auto max-w-7xl space-y-6">
