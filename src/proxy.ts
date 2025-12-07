@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import logger from './lib/logger';
 import { refreshTokenOnServer } from './lib/server-utils';
 import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from './lib/constants';
 
@@ -20,7 +21,7 @@ function getPayloadFromToken(token: string) {
 
 		return payload;
 	} catch (error) {
-		console.error('Error al decodificar el payload del token.', error);
+		logger.error('Error al decodificar el payload del token.', { error });
 		return null;
 	}
 }
@@ -77,7 +78,7 @@ async function handlePageAuth(request: NextRequest) {
 			}
 			return response;
 		} catch (error) {
-			console.error('Error en el proxy al intentar refrescar el token:', error);
+			logger.error('Error en el proxy al intentar refrescar el token:', { error });
 			// En caso de un error inesperado, es más seguro redirigir al login.
 			return NextResponse.redirect(new URL('/login?error=proxy_error', request.url));
 		}
