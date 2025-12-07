@@ -1,6 +1,7 @@
 import { ACCESS_TOKEN_COOKIE_NAME } from '@/lib/constants';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { apiLogger as logger } from '@/lib/logger';
 
 const BACKEND_URL = process.env.BACKEND_API_URL || 'http://localhost:9001';
 
@@ -34,7 +35,7 @@ async function proxyRequestWithId(request: NextRequest, { params }: { params: { 
 			headers: backendResponse.headers,
 		});
 	} catch (error) {
-		console.error(`Error proxying ${request.method} to ${url}:`, error);
+		logger.error(`Error proxying ${request.method} to ${url}:`, error);
 		return NextResponse.json({ message: 'Error al contactar el servidor backend.' }, { status: 502 }); // 502 Bad Gateway
 	}
 }

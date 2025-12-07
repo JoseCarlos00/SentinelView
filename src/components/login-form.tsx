@@ -26,7 +26,7 @@ export function LoginForm() {
 		try {
 			// Usamos la función centralizada
 			const accessToken = await login(username, password);
-			console.log('Login successful, access token:', accessToken);
+			logClient('info', 'Intento de login exitoso', { username });
 
 			// El backend, a través del proxy de Next.js, ya ha establecido las cookies
 			// (accessToken y refreshToken) en el navegador a través de las cabeceras Set-Cookie.
@@ -81,7 +81,7 @@ export function LoginForm() {
 						<Input
 							id='password'
 							type='password'
-							placeholder='••••••••'
+							placeholder='********'
 							value={password}
 							onChange={(e) => setPassword(e.target.value)}
 							required

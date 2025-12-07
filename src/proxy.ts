@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { authLogger as logger } from './lib/logger';
-import { refreshTokenOnServer } from './lib/server-utils';
-import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from './lib/constants';
+import { apiLogger as logger } from '@/lib/logger';
+import { refreshTokenOnServer } from '@/lib/server-utils';
+import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from '@/lib/constants';
 
 // Función para decodificar el payload de un JWT (sin verificar firma)
 function getPayloadFromToken(token: string) {
