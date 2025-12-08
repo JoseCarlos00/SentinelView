@@ -19,8 +19,8 @@ export default function InventoryHeader({ currentUser }: { currentUser: { userna
 
 
 	return (
-		<header className='flex h-16 items-center border-b border-border bg-card px-6'>
-			<div className='flex items-center justify-between px-6 py-4 w-full max-w-7xl mx-auto'>
+		<header className='flex h-16 items-center border-b border-border bg-card pl-12 px-6'>
+			<div className='flex items-center justify-between max-sm:px-6 py-4 w-full max-w-7xl mx-auto'>
 				<div className='flex items-center gap-3'>
 					<div className='flex h-10 w-10 items-center justify-center rounded-lg bg-primary'>
 						<Activity className='h-6 w-6 text-primary-foreground' />

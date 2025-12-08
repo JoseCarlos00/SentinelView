@@ -162,95 +162,107 @@ export default function UsersClientPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">Gestión de Usuarios</h1>
-        <Button onClick={() => setCreateDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Crear Nuevo Usuario
-        </Button>
-      </div>
+		<div className='space-y-4'>
+			<div className='flex flex-col max-md:px-4 gap-5'>
+				<div className='flex items-center justify-between  max-md:pt-4 sm:w-[60%]'>
+					<h1 className='sm:text-2xl text-[18px] font-bold text-foreground'>Gestión de Usuarios</h1>
+					<Button onClick={() => setCreateDialogOpen(true)}>
+						<Plus className='mr-2 h-4 w-4' />
+						Crear <span className='hidden md:inline'>Nuevo Usuario</span>
+					</Button>
+				</div>
 
-      <div className="rounded-lg border border-border bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="text-card-foreground">ID</TableHead>
-              <TableHead className="text-card-foreground">Nombre de Usuario</TableHead>
-              <TableHead className="text-card-foreground">Rol</TableHead>
-              <TableHead className="text-right text-card-foreground">Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center text-muted-foreground">
-                  No hay usuarios registrados
-                </TableCell>
-              </TableRow>
-            ) : (
-              users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium text-card-foreground">{user.id}</TableCell>
-                  <TableCell className="text-card-foreground">{user.username}</TableCell>
-                  <TableCell>
-                    <Badge variant={getRoleBadgeVariant(user.role)}>{user.role}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedUser(user)
-                            setEditDialogOpen(true)
-                          }}
-                        >
-                          Editar Rol
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          onClick={() => {
-                            setSelectedUser(user)
-                            setDeleteDialogOpen(true)
-                          }}
-                        >
-                          Eliminar Usuario
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+				<div className='rounded-lg border border-border bg-card sm:w-[60%]'>
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead className='text-card-foreground'>ID</TableHead>
+								<TableHead className='text-card-foreground'>Nombre de Usuario</TableHead>
+								<TableHead className='text-card-foreground'>Rol</TableHead>
+								<TableHead className='text-right text-card-foreground'>Acciones</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{users.length === 0 ? (
+								<TableRow>
+									<TableCell
+										colSpan={4}
+										className='text-center text-muted-foreground'
+									>
+										No hay usuarios registrados
+									</TableCell>
+								</TableRow>
+							) : (
+								users.map((user) => (
+									<TableRow key={user.id}>
+										<TableCell className='font-medium text-card-foreground'>{user.id}</TableCell>
+										<TableCell className='text-card-foreground'>{user.username}</TableCell>
+										<TableCell>
+											<Badge variant={getRoleBadgeVariant(user.role)}>{user.role}</Badge>
+										</TableCell>
+										<TableCell className='text-right'>
+											<DropdownMenu>
+												<DropdownMenuTrigger asChild>
+													<Button
+														variant='ghost'
+														size='icon'
+													>
+														<MoreVertical className='h-4 w-4' />
+													</Button>
+												</DropdownMenuTrigger>
+												<DropdownMenuContent align='end'>
+													<DropdownMenuItem
+														onClick={() => {
+															setSelectedUser(user);
+															setEditDialogOpen(true);
+														}}
+													>
+														Editar Rol
+													</DropdownMenuItem>
+													<DropdownMenuItem
+														className='text-destructive'
+														onClick={() => {
+															setSelectedUser(user);
+															setDeleteDialogOpen(true);
+														}}
+													>
+														Eliminar Usuario
+													</DropdownMenuItem>
+												</DropdownMenuContent>
+											</DropdownMenu>
+										</TableCell>
+									</TableRow>
+								))
+							)}
+						</TableBody>
+					</Table>
+				</div>
 
-      <CreateUserDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} onCreateUser={handleCreateUser} />
+				<CreateUserDialog
+					open={createDialogOpen}
+					onOpenChange={setCreateDialogOpen}
+					onCreateUser={handleCreateUser}
+				/>
 
-      {selectedUser && (
-        <>
-          <EditRoleDialog
-            open={editDialogOpen}
-            onOpenChange={setEditDialogOpen}
-            user={selectedUser}
-            onEditRole={handleEditRole}
-          />
-          <DeleteUserDialog
-            open={deleteDialogOpen}
-            onOpenChange={setDeleteDialogOpen}
-            user={selectedUser}
-            onDeleteUser={handleDeleteUser}
-          />
-        </>
-      )}
+				{selectedUser && (
+					<>
+						<EditRoleDialog
+							open={editDialogOpen}
+							onOpenChange={setEditDialogOpen}
+							user={selectedUser}
+							onEditRole={handleEditRole}
+						/>
+						<DeleteUserDialog
+							open={deleteDialogOpen}
+							onOpenChange={setDeleteDialogOpen}
+							user={selectedUser}
+							onDeleteUser={handleDeleteUser}
+						/>
+					</>
+				)}
 
-      <Toaster />
-    </div>
-  )
+				<Toaster />
+			</div>
+		</div>
+	);
 }
