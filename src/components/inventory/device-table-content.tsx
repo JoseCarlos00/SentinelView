@@ -16,9 +16,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Search, WifiIcon, WifiOffIcon } from 'lucide-react';
 
-import { columns as deviceColumns } from '@/components/inventory/table/columns';
-import { DataTable } from '@/components/inventory/table/data-table';
 import { Device } from '@/types/devices'
+import { columns as deviceColumns } from '@/components/inventory/table/columns';
+import  DataTable  from '@/components/inventory/table/data-table';
+import DataTableViewOptions from '@/components/inventory/table/data-table-view-options';
+
 
 
 // Este componente recibe los datos directamente del Server Component Padre
@@ -105,6 +107,8 @@ export default function DeviceTableContent({ devices }: { devices: Device[] }) {
 								</SelectItem>
 						</SelectContent>
 					</Select>
+					
+					<DataTableViewOptions table={table} />
 				</div>
 			</CardHeader>
 			<CardContent>

@@ -12,9 +12,9 @@ interface DataTableProps<TData, TValue> {
 	table: TableType<TData>;
 }
 
-export function DataTable<TData, TValue>({ table, columns }: DataTableProps<TData, TValue>) {
+export default function DataTable<TData, TValue>({ table, columns }: DataTableProps<TData, TValue>) {
 	return (
-		<div className='overflow-hidden rounded-md border'>
+		<div className='overflow-hidden rounded-md border pr-1'>
 			<Table>
 				<TableHeader>
 					{table.getHeaderGroups().map((headerGroup) => (
@@ -35,7 +35,12 @@ export function DataTable<TData, TValue>({ table, columns }: DataTableProps<TDat
 								data-state={row.getIsSelected() && 'selected'}
 							>
 								{row.getVisibleCells().map((cell) => (
-									<TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+									<TableCell
+										className='py-0.5 px-1'
+										key={cell.id}
+									>
+										{flexRender(cell.column.columnDef.cell, cell.getContext())}
+									</TableCell>
 								))}
 							</TableRow>
 						))

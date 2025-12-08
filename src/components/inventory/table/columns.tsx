@@ -4,6 +4,8 @@ import { Device } from '@/types/devices';
 import { ColumnDef } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Wifi, WifiOff } from 'lucide-react';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -48,7 +50,23 @@ export const columns: ColumnDef<Device>[] = [
 	},
 	{
 		accessorKey: 'isConnected',
-		header: 'Conectado',
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title='Estatus' />
+		),
+		cell: ({ row }) => {
+			const isConnected = row.original.isConnected;
+
+			return isConnected === true ? (
+				<Badge variant='outline' className='border-green-500 text-green-500'>
+					<Wifi className='mr-1 h-3 w-3' />
+				</Badge>
+			) : (
+				<Badge variant='outline' className='border-red-500 text-red-500 opacity-60'>
+					<WifiOff className='mr-1 h-3 w-3' />
+				</Badge>
+			);
+		},
+		 enableHiding: false,
 	},
 	{
 		accessorKey: 'equipo',
@@ -64,18 +82,29 @@ export const columns: ColumnDef<Device>[] = [
 	},
 	{
 		accessorKey: 'usuario',
-		header: 'Usuario',
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title='Usuario' />
+		),
+		cell: (props) => (
+			<span className='font-medium'>{props.row.original.usuario}</span>
+		)
 	},
 	{
 		accessorKey: 'correo',
-		header: 'Correo',
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title='Correo' />
+		),
 	},
 	{
 		accessorKey: 'aliasUsuario',
-		header: 'Alias Usuario',
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title='Alias Usuario' />
+		),
 	},
 	{
 		accessorKey: 'ip',
-		header: 'IP',
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title='IP' />
+		),
 	},
 ];
