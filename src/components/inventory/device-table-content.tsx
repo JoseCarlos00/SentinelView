@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { Device } from '@/types/devices'
 
-import { columns, DeviceTable } from '@/components/inventory/table/columns';
+import { columns } from '@/components/inventory/table/columns';
 import { DataTable } from '@/components/inventory/table/data-table';
 
 
