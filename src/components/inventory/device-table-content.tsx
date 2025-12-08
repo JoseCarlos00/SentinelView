@@ -1,33 +1,49 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+	ColumnDef,
+	ColumnFiltersState,
+	SortingState,
+	VisibilityState,
+	getCoreRowModel,
+	getFilteredRowModel,
+	getSortedRowModel,
+	useReactTable,
+} from '@tanstack/react-table';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
-import { Device } from '@/types/devices'
+import { Search, WifiIcon, WifiOffIcon } from 'lucide-react';
 
-import { columns } from '@/components/inventory/table/columns';
+import { columns as deviceColumns } from '@/components/inventory/table/columns';
 import { DataTable } from '@/components/inventory/table/data-table';
+import { Device } from '@/types/devices'
 
 
 // Este componente recibe los datos directamente del Server Component Padre
 export default function DeviceTableContent({ devices }: { devices: Device[] }) {
-	const [searchTerm, setSearchTerm] = useState('');
-	const [statusFilter, setStatusFilter] = useState<string>('all');
+		const [sorting, setSorting] = useState<SortingState>([]);
+		const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+		const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+		const [globalFilter, setGlobalFilter] = useState('');
+		
+		const columns = useMemo<ColumnDef<Device>[]>(() => deviceColumns, []);
 
-	// Filter devices
-	const filteredDevices = devices.filter((device) => {
-		const lowerCaseSearchTerm = searchTerm.toLowerCase();
-		const matchesSearch =
-			device.usuario.toLowerCase().includes(lowerCaseSearchTerm) ||
-			device.ip.includes(searchTerm) ||
-			(device.aliasUsuario && device.aliasUsuario.toLowerCase().includes(lowerCaseSearchTerm)) ||
-			device.equipo.toLowerCase().includes(lowerCaseSearchTerm);
-		const status = device.isConnected ? 'connected' : 'disconnected';
-		const matchesStatus = statusFilter === 'all' || status === statusFilter;
-		return matchesSearch && matchesStatus;
-	});
+		const table = useReactTable({
+			data: devices,
+			columns,
+			onSortingChange: setSorting,
+			onColumnFiltersChange: setColumnFilters,
+			onColumnVisibilityChange: setColumnVisibility,
+			onGlobalFilterChange: setGlobalFilter,
+			getCoreRowModel: getCoreRowModel(),
+			getSortedRowModel: getSortedRowModel(),
+			getFilteredRowModel: getFilteredRowModel(),
+			state: { sorting, columnFilters, columnVisibility, globalFilter },
+		});
+
+
 
 	if (devices.length === 0) {
 		return (
@@ -47,37 +63,56 @@ export default function DeviceTableContent({ devices }: { devices: Device[] }) {
 		<Card>
 			<CardHeader>
 				<CardDescription>Gestión y monitoreo de dispositivos en red</CardDescription>
-				{/* Filters and Search */}
+
 				<div className='mb-4 flex gap-4'>
 					<div className='relative flex-1'>
 						<Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
 						<Input
-							placeholder='Buscar por nombre o IP...'
-							value={searchTerm}
-							onChange={(e) => setSearchTerm(e.target.value)}
+							placeholder='Filtrar tabla...'
+							value={globalFilter ?? ''}
+							onChange={(event) => setGlobalFilter(event.target.value)}
 							className='pl-10'
 						/>
 					</div>
 
 					<Select
-						value={statusFilter}
-						onValueChange={setStatusFilter}
+						value={
+							// Mapeamos el valor booleano del filtro de vuelta a un string para el Select
+							(table.getColumn('isConnected')?.getFilterValue() === true && 'Conectado') ||
+							(table.getColumn('isConnected')?.getFilterValue() === false && 'Desconectado') ||
+							'all'
+						}
+						onValueChange={(value) => {
+							const filterValue = value === 'Conectado' ? true : value === 'Desconectado' ? false : null;
+							table.getColumn('isConnected')?.setFilterValue(filterValue);
+						}}
 					>
 						<SelectTrigger className='w-48'>
 							<SelectValue placeholder='Filtrar por estado' />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value='all'>Todos los estados</SelectItem>
-							<SelectItem value='connected'>Conectados</SelectItem>
-							<SelectItem value='disconnected'>Desconectados</SelectItem>
+							<SelectItem value='all'>
+								<WifiIcon />
+								Todos 
+							</SelectItem>
+							<SelectItem value='Conectado'>
+								<WifiIcon />
+								Conectados
+								</SelectItem>
+							<SelectItem value='Desconectado'>
+								<WifiOffIcon />
+								Desconectados
+								</SelectItem>
 						</SelectContent>
 					</Select>
 				</div>
 			</CardHeader>
 			<CardContent>
-				{/* Device Table */}
 				<div className='rounded-md border border-border max-h-[60vh] overflow-x-hidden overflow-y-auto'>
-					<DataTable columns={columns} data={filteredDevices} />
+					<DataTable
+						columns={columns}
+						table={table}
+					/>
 				</div>
 			</CardContent>
 		</Card>
