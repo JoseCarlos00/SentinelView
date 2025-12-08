@@ -1,5 +1,6 @@
 import AlertScannerDashboard from '@/components/alert-scanner-dashboard';
 import TableContent from '@/components/inventory/table-content';
+import { WebSocketProvider } from '@/contexts/websocket-context';
 import { fetchInventoryData, getAuthDataFromServer } from '@/lib/server-utils';
 
 const devicesMock = [
@@ -53,7 +54,7 @@ const devicesMock = [
 	},
 	{
 		id: 'index-6',
-		androidId: null,
+		androidId: 'rfhfh-3',
 		equipo: 'FM00005',
 		modelo: 'MEMOR10',
 		usuario: '',
@@ -61,7 +62,7 @@ const devicesMock = [
 		aliasUsuario: '',
 		ip: '192.168.15.177',
 		macAddress: 'D0:4E:50:F8:63:46',
-		isConnected: false,
+		isConnected: true,
 	},
 	{
 		id: 'index-7',
@@ -649,7 +650,7 @@ const devicesMock = [
 		aliasUsuario: '',
 		ip: '192.168.15.94',
 		macAddress: 'b4:29:3d:8d:2a:6c',
-		isConnected: false,
+		isConnected: true,
 	},
 	{
 		id: 'index-56',
@@ -1672,12 +1673,10 @@ export default async function DashboardPage() {
 
 	return (
 		// 3. El componente Cliente (AlertScannerDashboard) envuelve al Server Component (DeviceTableContent)
-		<AlertScannerDashboard currentUser={currentUser}>
-			{/* El Server Component DeviceTableContent se renderiza a HTML 
-        antes de que AlertScannerDashboard se 'hidrate' en el cliente.
-      */}
+		<WebSocketProvider>
+			<AlertScannerDashboard currentUser={currentUser}>
 				<TableContent devices={devicesMock} />
-			
-		</AlertScannerDashboard>
+			</AlertScannerDashboard>
+		</WebSocketProvider>
 	);
 }

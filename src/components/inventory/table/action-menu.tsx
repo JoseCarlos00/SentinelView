@@ -12,12 +12,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Device } from '@/types/devices';
+import { useWebSocket } from '@/contexts/websocket-context';
 
 interface ActionsMenuProps<TValue> extends HTMLAttributes<HTMLDivElement> {
 	row: Row<TValue>;
 }
 
 export default function ActionsMenu<TValue>({ row }: ActionsMenuProps<TValue>) {
+	const { isConnected, sendMessage } = useWebSocket();
 	const currentUser = row.original as Device;
 	
 	if (!currentUser.androidId) {
@@ -28,24 +30,40 @@ export default function ActionsMenu<TValue>({ row }: ActionsMenuProps<TValue>) {
 		);
 	}
 
+	const handleAction = (action: 'ping' | 'alert' | 'message') => {
+		if (!currentUser.androidId) return;
+
+		const payload = {
+			targetId: currentUser.androidId,
+			// Puedes añadir más datos aquí si es necesario
+		};
+
+		sendMessage(action, payload);
+		console.log(`Enviando '${action}' a ${currentUser.androidId}`);
+	};
+
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
 				<Button
 					variant='ghost'
 					className='h-8 w-8 p-0'
+					disabled={!isConnected}
 				>
 					<span className='sr-only'></span>
 					<MoreHorizontal className='h-4 w-4' />
 				</Button>
 			</DropdownMenuTrigger>
 			
-			<DropdownMenuContent align='end'>
-				<DropdownMenuItem>Ping</DropdownMenuItem>
+			<DropdownMenuContent
+				align='end'
+				hidden={!isConnected}
+			>
+				<DropdownMenuItem onClick={() => handleAction('ping')}>Ping</DropdownMenuItem>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem>Alerta</DropdownMenuItem>
+				<DropdownMenuItem onClick={() => handleAction('alert')}>Alerta</DropdownMenuItem>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem>Mensaje</DropdownMenuItem>
+				<DropdownMenuItem onClick={() => handleAction('message')}>Mensaje</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
