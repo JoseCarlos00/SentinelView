@@ -1,5 +1,5 @@
 import AlertScannerDashboard from '@/components/alert-scanner-dashboard';
-import DeviceTableContent from '@/components/inventory/device-table-content';
+import DeviceTableContent from '@/components/inventory/table-content';
 import { fetchInventoryData, getAuthDataFromServer } from '@/lib/server-utils';
 
 const devicesMock = [
