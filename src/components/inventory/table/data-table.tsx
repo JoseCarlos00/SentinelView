@@ -2,6 +2,7 @@
 
 import { ColumnDef, Table as TableType, flexRender } from '@tanstack/react-table';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Device } from '@/types/devices';
 
 interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];
@@ -24,21 +25,27 @@ export default function DataTable<TData, TValue>({ table, columns }: DataTablePr
 				</TableHeader>
 				<TableBody>
 					{table.getRowModel().rows?.length ? (
-						table.getRowModel().rows.map((row) => (
-							<TableRow
-								key={row.id}
-								data-state={row.getIsSelected() && 'selected'}
-							>
-								{row.getVisibleCells().map((cell) => (
-									<TableCell
-										className='py-0.5 px-1'
-										key={cell.id}
-									>
-										{flexRender(cell.column.columnDef.cell, cell.getContext())}
-									</TableCell>
-								))}
-							</TableRow>
-						))
+						table.getRowModel().rows.map((row) => {
+							const currentUser = row.original as Device;
+							const isConnected = currentUser.isConnected;
+
+							return (
+								<TableRow
+									key={row.id}
+									data-state={row.getIsSelected() && 'selected'}
+									className={isConnected === true ? '' : 'text-gray-400'}
+								>
+									{row.getVisibleCells().map((cell) => (
+										<TableCell
+											className='py-0.5 px-1'
+											key={cell.id}
+										>
+											{flexRender(cell.column.columnDef.cell, cell.getContext())}
+										</TableCell>
+									))}
+								</TableRow>
+							);
+						})
 					) : (
 						<TableRow>
 							<TableCell
