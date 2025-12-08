@@ -26,7 +26,7 @@ export default function AlertScannerDashboard({ children, currentUser }: Dashboa
     const isSuperAdmin = currentUser.role === 'SUPER_ADMIN';
 
     return (
-        <div className="min-h-screen bg-background p-6">
+        <div className="min-h-screen bg-background sm:p-6">
             {/* ... (Header, Sidebar, y Métricas del Dashboard, adaptadas o extraídas) ... */}
 
            <label>Mostrar Metricas</label>

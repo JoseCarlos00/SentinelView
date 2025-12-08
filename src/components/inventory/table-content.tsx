@@ -89,30 +89,33 @@ export default function TableContent({ devices }: { devices: Device[] }) {
 							table.getColumn('isConnected')?.setFilterValue(filterValue);
 						}}
 					>
-						<SelectTrigger className='w-48'>
+						<SelectTrigger className='sm:w-48'>
 							<SelectValue placeholder='Filtrar por estado' />
 						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value='all'>
+						<SelectContent className='sm:w-48'>
+							<SelectItem className='sm:w-48' value='all'>
 								<WifiIcon />
-								Todos 
+								<span className='ml-2 hidden sm:inline'>Todos</span>
 							</SelectItem>
-							<SelectItem value='Conectado'>
+							<SelectItem className='sm:w-48' value='Conectado'>
 								<WifiIcon />
-								Conectados
-								</SelectItem>
-							<SelectItem value='Desconectado'>
+								<span className='ml-2 hidden sm:inline'>Conectados</span>
+							</SelectItem>
+							<SelectItem className='sm:w-48' value='Desconectado'>
 								<WifiOffIcon />
-								Desconectados
-								</SelectItem>
+								<span className='ml-2 hidden sm:inline'>Desconectados</span>
+							</SelectItem>
 						</SelectContent>
 					</Select>
-					
+
 					<DataTableViewOptions table={table} />
 				</div>
 			</CardHeader>
 			<CardContent className='grow flex'>
-				<DataTable columns={columns} table={table} />
+				<DataTable
+					columns={columns}
+					table={table}
+				/>
 			</CardContent>
 		</Card>
 	);

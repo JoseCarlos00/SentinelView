@@ -32,11 +32,15 @@ export default function AdminSidebar({ currentUser }: AdminSidebarProps) {
   const pathname = usePathname()
 
   return (
-    <aside className="w-64 border-r border-sidebar-border bg-sidebar">
+    <aside className="fixed inset-y-0 left-0 z-20 flex h-full flex-col border-r border-sidebar-border bg-sidebar transition-all w-18 lg:w-64">
       <div className="flex h-16 items-center border-b border-sidebar-border px-6">
-        <h1 className="text-lg font-semibold text-sidebar-foreground"><Link href="/">Panel Admin</Link></h1>
+        <Link href="/" className="flex items-center gap-2 font-semibold text-sidebar-foreground">
+          {/* Puedes usar un logo aquí si quieres */}
+          <Package className="h-6 w-6" />
+          <span className="hidden lg:inline">Panel Admin</span>
+        </Link>
       </div>
-      <nav className="space-y-1 p-4">
+      <nav className="flex flex-col gap-2 p-4">
         {menuItems
           .filter((item) => {
             // Si el item no tiene una propiedad 'roles', es público para todos.
@@ -50,15 +54,15 @@ export default function AdminSidebar({ currentUser }: AdminSidebarProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                className={cn( // Se justifica al centro en modo ícono
+                  'flex items-center justify-center gap-3 rounded-lg py-2 text-sm font-medium transition-colors lg:justify-start lg:px-3',
                   isActive
                     ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                     : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
                 )}
               >
-                <Icon className='h-4 w-4' />
-                {item.title}
+                <Icon className='h-5 w-5' />
+                <span className="hidden lg:inline">{item.title}</span>
               </Link>
             );
           })}

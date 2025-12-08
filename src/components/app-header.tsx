@@ -25,14 +25,14 @@ export default function InventoryHeader({ currentUser }: { currentUser: { userna
 					<div className='flex h-10 w-10 items-center justify-center rounded-lg bg-primary'>
 						<Activity className='h-6 w-6 text-primary-foreground' />
 					</div>
-					<h1 className='text-2xl font-semibold text-foreground'>AlertScanner Control</h1>
+					<h1 className='text-2xl font-semibold text-foreground hidden sm:block'>AlertScanner Control</h1>
 				</div>
 
 				<div className='flex items-center gap-4'>
 					<div className='text-right'>
 						<p className='text-sm text-muted-foreground'>Usuario</p>
 						<p className='text-sm font-medium text-foreground'>
-							{currentUser.username} · {currentUser.role}
+							{currentUser.username} <span className='hidden sm:inline'>· {currentUser.role}</span>
 						</p>
 					</div>
 					<Button
@@ -42,7 +42,7 @@ export default function InventoryHeader({ currentUser }: { currentUser: { userna
 						className='cursor-pointer'
 					>
 						<LogOut className='mr-2 h-4 w-4' />
-						Cerrar Sesión
+						<span className='hidden sm:inline'>Cerrar Sesión</span>
 					</Button>
 				</div>
 			</div>

@@ -9,7 +9,7 @@ interface DataTableProps<TData, TValue> {
 }
 export default function DataTable<TData, TValue>({ table, columns }: DataTableProps<TData, TValue>) {
 	return (
-		<div className='relative h-96 overflow-auto rounded-md border'>
+		<div className='relative h-96 overflow-auto rounded-md border w-full'>
 			<Table>
 				<TableHeader className='sticky top-0 z-10 bg-card'>
 					{table.getHeaderGroups().map((headerGroup) => (

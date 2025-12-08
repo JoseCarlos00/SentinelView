@@ -19,12 +19,10 @@ export default async function ProtectedLayout({
 			       Su única función es pasar el token al cliente para actualizar Zustand. */}
 			<AuthStateSync accessToken={accessToken} />
 			<AdminSidebar currentUser={{ username: currentUser.username, role: currentUser.role }} />
-			
-			<div className='flex flex-1 flex-col overflow-hidden'>
+
+			<div className='flex flex-1 flex-col overflow-hidden ml-18 lg:ml-64'>
 				<InventoryHeader currentUser={{ username: currentUser.username, role: currentUser.role }} />
-					<main className='flex-1 overflow-y-auto p-6'>
-						{children}
-					</main>
+				<main className='flex-1 overflow-y-auto sm:p-6'>{children}</main>
 			</div>
 		</div>
 	);
