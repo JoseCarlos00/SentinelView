@@ -1,22 +1,17 @@
 'use client';
 
-import {
-	ColumnDef,
-	Table as TableType,
-	flexRender,
-} from '@tanstack/react-table';
+import { ColumnDef, Table as TableType, flexRender } from '@tanstack/react-table';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];
 	table: TableType<TData>;
 }
-
 export default function DataTable<TData, TValue>({ table, columns }: DataTableProps<TData, TValue>) {
 	return (
-		<div className='overflow-hidden rounded-md border pr-1'>
+		<div className='relative h-96 overflow-auto rounded-md border'>
 			<Table>
-				<TableHeader>
+				<TableHeader className='sticky top-0 z-10 bg-card'>
 					{table.getHeaderGroups().map((headerGroup) => (
 						<TableRow key={headerGroup.id}>
 							{headerGroup.headers.map((header) => (

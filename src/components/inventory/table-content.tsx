@@ -24,7 +24,7 @@ import DataTableViewOptions from '@/components/inventory/table/data-table-view-o
 
 
 // Este componente recibe los datos directamente del Server Component Padre
-export default function DeviceTableContent({ devices }: { devices: Device[] }) {
+export default function TableContent({ devices }: { devices: Device[] }) {
 		const [sorting, setSorting] = useState<SortingState>([]);
 		const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 		const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -62,7 +62,7 @@ export default function DeviceTableContent({ devices }: { devices: Device[] }) {
 	}
 
 	return (
-		<Card>
+		<Card className='flex flex-col h-full'>
 			<CardHeader>
 				<CardDescription>Gestión y monitoreo de dispositivos en red</CardDescription>
 
@@ -111,13 +111,8 @@ export default function DeviceTableContent({ devices }: { devices: Device[] }) {
 					<DataTableViewOptions table={table} />
 				</div>
 			</CardHeader>
-			<CardContent>
-				<div className='rounded-md border border-border max-h-[60vh] overflow-x-hidden overflow-y-auto'>
-					<DataTable
-						columns={columns}
-						table={table}
-					/>
-				</div>
+			<CardContent className='grow flex'>
+				<DataTable columns={columns} table={table} />
 			</CardContent>
 		</Card>
 	);
