@@ -1,4 +1,4 @@
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/store/use-auth';
 import { apiFetch } from './api';
 
 function deleteClientCookies() {

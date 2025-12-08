@@ -1,4 +1,4 @@
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/store/use-auth';
 import { refreshToken } from './auth';
 
 type ApiFetchOptions = RequestInit & {

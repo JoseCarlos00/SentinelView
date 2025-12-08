@@ -1,6 +1,5 @@
 import AlertScannerDashboard from '@/components/alert-scanner-dashboard';
 import TableContent from '@/components/inventory/table-content';
-import { WebSocketProvider } from '@/contexts/websocket-context';
 import { fetchInventoryData, getAuthDataFromServer } from '@/lib/server-utils';
 
 const devicesMock = [
@@ -1663,9 +1662,6 @@ const devicesMock = [
 ];
 
 export default async function DashboardPage() {
-	// 1. La información del usuario y la sincronización de Zustand ya se manejan en el layout.
-	//    Gracias a React.cache, esta llamada no vuelve a ejecutar la función,
-	//    sino que devuelve los datos ya obtenidos en el layout.
 	const { accessToken, currentUser } = await getAuthDataFromServer();
 
 	// 2. Obtiene los datos de inventario con el token (en el servidor)
@@ -1673,10 +1669,8 @@ export default async function DashboardPage() {
 
 	return (
 		// 3. El componente Cliente (AlertScannerDashboard) envuelve al Server Component (DeviceTableContent)
-		<WebSocketProvider>
 			<AlertScannerDashboard currentUser={currentUser}>
 				<TableContent devices={devicesMock} />
 			</AlertScannerDashboard>
-		</WebSocketProvider>
 	);
 }

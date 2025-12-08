@@ -3,6 +3,7 @@ import AdminSidebar from '@/components/admin-sidebar';
 import InventoryHeader from '@/components/app-header';
 import { getAuthDataFromServer } from '@/lib/server-utils';
 import { AuthStateSync } from '@/components/auth-state-sync';
+import { SocketInitializer } from '@/components/socket-initializer';
 
 export default async function ProtectedLayout({
 	children,
@@ -15,9 +16,8 @@ export default async function ProtectedLayout({
 
 	return (
 		<div className='flex h-screen'>
-			{/* 2. El componente de sincronización se renderiza pero no es visible.
-			       Su única función es pasar el token al cliente para actualizar Zustand. */}
 			<AuthStateSync accessToken={accessToken} />
+			<SocketInitializer />
 			<AdminSidebar currentUser={{ username: currentUser.username, role: currentUser.role }} />
 
 			<div className='flex flex-1 flex-col overflow-hidden  lg:ml-64'>

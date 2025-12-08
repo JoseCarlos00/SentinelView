@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/store/use-auth';
 
 interface AuthStateSyncProps {
   accessToken: string | null;

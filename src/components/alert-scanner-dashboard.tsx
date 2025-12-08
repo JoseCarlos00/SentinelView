@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSocketStore } from '@/modules/ws/use-socket-store';
 import { Button } from '@/components/ui/button';
 // ... (resto de tus importaciones)
 
@@ -17,28 +18,29 @@ interface DashboardProps {
 // *** Componente Cliente (Contenedor de Interactividad) ***
 export default function AlertScannerDashboard({ children, currentUser }: DashboardProps) {
     // 1. Estado y Lógica del Cliente (Filtros, Logs, Socket.IO)
-    const [logs, setLogs] = useState(/* ... logs iniciales ... */);
+    // const [logs, setLogs] = useState(/* ... logs iniciales ... */);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
+
+    const { isConnected } = useSocketStore((state: { isConnected: boolean }) => ({
+			isConnected: state.isConnected,
+		}));
     
     // ... (Tu función addLog, handlePing, handleAlarm, useEffect para Socket.IO) ...
 
     const isSuperAdmin = currentUser.role === 'SUPER_ADMIN';
 
     return (
-        <div className="min-h-screen bg-background sm:p-6">
-            {/* ... (Header, Sidebar, y Métricas del Dashboard, adaptadas o extraídas) ... */}
+			<div className='min-h-screen bg-background sm:p-6'>
+				{/* ... (Header, Sidebar, y Métricas del Dashboard, adaptadas o extraídas) ... */}
 
-           <label>Mostrar Metricas</label>
-            
+				<p>Estado del Socket: {isConnected ? '✅ Conectado' : '❌ Desconectado'}</p>
 
-            {/* 2. El children (El contenido de la tabla de dispositivos) inyectado aquí */}
-            <div className="mx-auto max-w-7xl space-y-6">
-                {children} 
-            </div>
+				{/* 2. El children (El contenido de la tabla de dispositivos) inyectado aquí */}
+				<div className='mx-auto max-w-7xl space-y-6'>{children}</div>
 
-            {/* 3. La Consola de Eventos (Controlada por estado local/Client) */}
-            {/* ... (Tu componente de Consola de Eventos y logs) ... */}
-        </div>
-    );
+				{/* 3. La Consola de Eventos (Controlada por estado local/Client) */}
+				{/* ... (Tu componente de Consola de Eventos y logs) ... */}
+			</div>
+		);
 }
