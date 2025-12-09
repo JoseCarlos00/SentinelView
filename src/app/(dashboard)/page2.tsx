@@ -1,6 +1,6 @@
 import AlertScannerDashboard from '@/components/alert-scanner-dashboard';
 import TableContent from '@/components/inventory/table-content';
-import { User } from "@/types/index";
+import { User } from "@/types";
 import { UserRole } from "@/lib/auth/roles";
 
 const devicesMock = [

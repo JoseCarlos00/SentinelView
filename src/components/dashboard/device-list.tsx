@@ -77,7 +77,8 @@ export default function DeviceList({ initialDevices }: DeviceListProps) {
 	// ============================================
 
 	useEffect(() => {
-		// Obtén la URL del backend del entorno
+		console.log('URL:', process.env.NEXT_PUBLIC_SOCKET_URL);
+		
 		const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
 			withCredentials: true,
 			query: {

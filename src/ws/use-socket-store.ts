@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { io, Socket } from 'socket.io-client';
-import { useAuth } from '@/store/use-auth';
+// import { useAuth } from '@/store/use-auth';
 
 export type LogEntry = {
 	id: string;
@@ -46,7 +46,7 @@ export const useSocketStore = create<SocketState>((set, get) => ({
 
 	connect: () => {
 		const { socket: existingSocket, addLog } = get();
-		const token = useAuth.getState().accessToken;
+		const token = ''
 
 		if (!token) {
 			addLog('Socket: No hay token de autenticación. Conexión abortada.', 'error');

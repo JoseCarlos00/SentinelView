@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { User } from "@/types/index";
+import { User } from "@/types";
 
 export interface TokenPayload {
 	userId: string;

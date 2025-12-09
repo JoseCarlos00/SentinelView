@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
-import { User } from "@/types/index";
+import { User } from "@/types";
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 

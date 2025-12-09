@@ -1,7 +1,7 @@
 'use client'
 
 import { useUser } from "@/hooks/use-user";
-import { User } from "@/types/index";
+import { User } from "@/types";
 
 export default function UserStoreSync({ initialUser }: { initialUser: User | null }) {
 	const setUser = useUser((state) => state.setUser);
