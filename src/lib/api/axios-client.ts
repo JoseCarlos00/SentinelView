@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // ⭐ Esta instancia SOLO se usa en 'use client' components
 const apiClient = axios.create({
-	baseURL: 'http://192.168.1.7:9001',
+	baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
 	withCredentials: true, // Enviar cookies automáticamente
 	timeout: 10000,
 });
@@ -28,7 +28,7 @@ const processQueue = (error: any, token: string | null = null) => {
 
 const isApiRefreshCall = (config: any) => {
 	// Comprueba si la solicitud es al endpoint de refresh
-	return config.url === 'http://192.168.1.7:9001/auth/refresh';
+	return config.url === `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/refresh`;
 };
 
 // ⭐ INTERCEPTOR DE RESPUESTA (maneja 401 automáticamente)
@@ -65,7 +65,7 @@ apiClient.interceptors.response.use(
 			try {
 				// ⭐ Llamar al endpoint de refresh
 				// Las cookies se envían automáticamente (withCredentials: true)
-				const refreshResponse = await axios.post('http://192.168.1.7:9001/auth/refresh', {}, { withCredentials: true });
+				const refreshResponse = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/refresh`, {}, { withCredentials: true });
 
 				if (refreshResponse.status === 200) {
 					console.log('[Axios Interceptor] Refresh exitoso ✅');

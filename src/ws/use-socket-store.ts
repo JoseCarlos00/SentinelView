@@ -23,7 +23,7 @@ interface SocketState {
 }
 
 // Obtén la URL del backend del entorno
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:9001';
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
 
 export const useSocketStore = create<SocketState>((set, get) => ({
 	socket: null,

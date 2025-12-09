@@ -77,7 +77,8 @@ export default function DeviceList({ initialDevices }: DeviceListProps) {
 	// ============================================
 
 	useEffect(() => {
-		const newSocket = io('http://192.168.1.7:9001', {
+		// Obtén la URL del backend del entorno
+		const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
 			withCredentials: true,
 			query: {
 				clientType: 'WEB_CLIENT',
@@ -104,14 +105,8 @@ export default function DeviceList({ initialDevices }: DeviceListProps) {
 
 		newSocket.on('device-status', (data) => {
 			console.log('[WebSocket] Actualización de dispositivo:', data);
-			
-			setDevices(prev => 
-				prev.map(d => 
-					d.id === data.deviceId 
-						? { ...d, ...data }
-						: d
-				)
-			);
+
+			setDevices((prev) => prev.map((d) => (d.id === data.deviceId ? { ...d, ...data } : d)));
 		});
 
 		newSocket.on('disconnect', () => {
