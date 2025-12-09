@@ -1,7 +1,7 @@
 import { UserRole } from '@/auth/roles';
 
 // Rutas completamente públicas (no requieren autenticación)
-export const PUBLIC_PATHS = ['/login', '/api/log', '/forbidden'] as const ;
+export const PUBLIC_PATHS = ['/login', '/api/log', '/api/auth/login', '/forbidden', '/test'] as const ;
 
 // Configuración de rutas protegidas por rol
 export const ROLE_PROTECTED_ROUTES: Array<{ path: string; allowedRoles: UserRole[] }> = [

@@ -47,7 +47,7 @@ async function handlePageAuth(request: NextRequest) {
 		logger.info('Usuario autenticado intenta acceder a /login, redirigiendo a /');
 		return NextResponse.redirect(new URL('/', request.url));
 	}
-
+	
 	// 2. Si el usuario no está autenticado y no está en página pública, redirigir a /login
 	if (!refreshTokenValue && !isPublicPath(pathname)) {
 		logger.info('Usuario no autenticado intenta acceder a ruta protegida', { pathname });
