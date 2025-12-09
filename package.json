@@ -9,13 +9,20 @@
 	},
 	"scripts": {
 		"build": "next build",
-		"dev": "next dev -p 3001",
+		"dev": "next dev -p 3100",
 		"lint": "eslint .",
 		"lint:next": "next lint",
 		"type-check": "tsc --noEmit",
-		"start": "next start -p 3001",
+		"start": "next start -p 3100",
 		"format": "prettier --write \"src/**/*.{ts,tsx,md}\"",
-		"clean": "rm -rf .next out node_modules/.cache"
+		"clean": "rm -rf .next out node_modules/.cache",
+
+		"test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "analyze": "ANALYZE=true next build",
+    "export": "next export",
+    "check-all": "npm run lint && npm run type-check && npm run build"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^3.10.0",
