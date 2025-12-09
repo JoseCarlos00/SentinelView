@@ -1,8 +1,8 @@
 'use client';
 
 import { useUser } from '@/store/use-user';
-import RoleBadge from '@/components/role-badge';
-import { UserRole } from '@/auth/roles';
+import RoleBadge from '@/components/auth/role-badge';
+import { UserRole } from '@/lib/auth/roles';
 
 export default function Header() {
 	const { user } = useUser();

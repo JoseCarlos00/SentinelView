@@ -1,4 +1,4 @@
-import { LoginForm } from '@/components/login-form';
+import { LoginForm } from '@/components/auth/login-form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { use } from 'react';
 import { Terminal } from 'lucide-react';

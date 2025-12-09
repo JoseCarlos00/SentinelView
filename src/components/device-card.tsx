@@ -1,7 +1,7 @@
 'use client'
 
-import { usePermission, useHasRole } from '@/components/role-badge';
-import { UserRole } from '@/auth/roles';
+import { usePermission, useHasRole } from '@/components/auth/role-badge';
+import { UserRole } from '@/lib/auth/roles';
 
 interface DeviceCardProps {
 	device: {

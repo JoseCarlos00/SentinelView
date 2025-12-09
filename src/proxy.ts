@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-import { apiLogger as logger } from '@/lib/logger';
+import { apiLogger as logger } from '@/lib/logging/logger';
 import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from '@/lib/constants';
 
-import { UserRole } from '@/auth/roles';
+import { UserRole } from '@/lib/auth/roles';
 
 import { getUserFromToken } from '@/proxy/utils';
 import { ROLE_PROTECTED_ROUTES, PUBLIC_PATHS } from '@/proxy/constants';

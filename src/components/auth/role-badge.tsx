@@ -2,7 +2,7 @@
 
 import { useUser } from '@/store/use-user'; // Asumiendo que tienes este context
 
-import { UserRole, getRoleBadgeColor, getRoleDisplayName } from '@/auth/roles';
+import { UserRole, getRoleBadgeColor, getRoleDisplayName } from '@/lib/auth/roles';
 
 interface RoleBadgeProps {
 	role: UserRole;

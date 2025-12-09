@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authLogger as logger } from '@/lib/logger';
+import { authLogger as logger } from '@/lib/logging/logger';
 
 export async function POST(request: Request) {
 	// 1. Obtener la URL del backend desde las variables de entorno.

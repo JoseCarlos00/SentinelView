@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import {clientLogger as logger} from '@/lib/logger'; // Importamos nuestro logger centralizado
+import {clientLogger as logger} from '@/lib/logging/logger'; // Importamos nuestro logger centralizado
 
 export async function POST(request: Request) {
 	try {

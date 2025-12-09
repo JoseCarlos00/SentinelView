@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
-import DeviceList from '@/components/DeviceList';
-import { ProtectedContent } from '@/components/role-badge';
-import { UserRole } from '@/auth/roles';
+import DeviceList from '@/components/dashboard/device-list';
+import { ProtectedContent } from '@/components/auth/role-badge';
+import { UserRole } from '@/lib/auth/roles';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { InfoIcon } from 'lucide-react';

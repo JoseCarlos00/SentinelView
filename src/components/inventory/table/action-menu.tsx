@@ -12,20 +12,19 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Device } from '@/types/devices';
-import { useWebSocket } from '@/contexts/websocket-context';
 
 interface ActionsMenuProps<TValue> extends HTMLAttributes<HTMLDivElement> {
 	row: Row<TValue>;
 }
 
 export default function ActionsMenu<TValue>({ row }: ActionsMenuProps<TValue>) {
-	const { isConnected, sendMessage } = useWebSocket();
+	const isConnected = true;
 	const currentUser = row.original as Device;
 	
 	if (!currentUser.androidId) {
 		return (
 			<span className='inline-flex items-center justify-center size-8 opacity-50'>
-				<Ellipsis className='size-4' />
+				{/* <Ellipsis className='size-4' /> */}
 			</span>
 		);
 	}
@@ -38,7 +37,7 @@ export default function ActionsMenu<TValue>({ row }: ActionsMenuProps<TValue>) {
 			// Puedes añadir más datos aquí si es necesario
 		};
 
-		sendMessage(action, payload);
+		// sendMessage(action, payload);
 		console.log(`Enviando '${action}' a ${currentUser.androidId}`);
 	};
 

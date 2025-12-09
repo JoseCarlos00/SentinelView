@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { cache } from 'react';
 import { Device } from '@/types/devices';
 import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from './constants';
-import { apiLogger, authLogger as logger } from './logger';
+import { apiLogger, authLogger as logger } from './logging/logger';
 
 interface RefreshResult {
 	newAccessToken: string | null;

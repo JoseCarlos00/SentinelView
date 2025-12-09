@@ -1,7 +1,7 @@
 import { ACCESS_TOKEN_COOKIE_NAME } from '@/lib/constants';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
-import { apiLogger as logger } from '@/lib/logger';
+import { apiLogger as logger } from '@/lib/logging/logger';
 
 const BACKEND_URL = process.env.BACKEND_API_URL || 'http://localhost:9001';
 

@@ -1,4 +1,4 @@
-import { UserRole } from '@/auth/roles';
+import { UserRole } from '@/lib/auth/roles';
 
 // Rutas completamente públicas (no requieren autenticación)
 export const PUBLIC_PATHS = ['/login', '/api/log', '/api/auth/login', '/forbidden', '/test'] as const ;

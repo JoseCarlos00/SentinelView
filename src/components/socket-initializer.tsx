@@ -10,13 +10,13 @@ export function SocketInitializer() {
 
 	useEffect(() => {
 		// 1. Conectar al montar
-		connect();
+		connect(); // Esta función ya obtiene el token más reciente de useAuth.
 
 		return () => {
 			// 2. Desconectar al desmontar el componente (ej: al cerrar sesión)
 			disconnect();
 		};
-	}, [connect, disconnect]); // Asegura que solo se ejecute una vez al montar/desmontar
+	}, []);
 
 	// Este componente no renderiza nada visible.
 	return null;
