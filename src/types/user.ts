@@ -1,7 +1,7 @@
+import { UserRole } from '@/auth/roles';
+
 export interface User {
 	id: string;
 	username: string;
-	role: Role;
+	role: UserRole;
 }
-
-export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'USER';

@@ -5,3 +5,10 @@ export interface AuthUser {
 	role: Role;
 	permissions: string[];
 }
+
+export interface TokenPayload {
+	userId: string;
+	username: string;
+	role: Role;
+	exp?: number;
+}
