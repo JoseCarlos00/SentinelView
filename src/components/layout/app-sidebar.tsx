@@ -1,4 +1,4 @@
-"use client"
+	"use client"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -12,12 +12,12 @@ const navItems = [
 	{ href: "/dashboard/settings", label: "Configuración", icon: Settings },
 ]
 
-interface AdminSidebarProps {
+interface AppSidebarProps {
 	className?: string,
 	onMenuClick?: () => void,
 }
 
-export default function AdminSidebar({ className, onMenuClick }: AdminSidebarProps) {
+export default function AppSidebar({ className, onMenuClick }: AppSidebarProps) {
 	const pathname = usePathname()
 
 	return (

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import AppHeader from '@/components/layout/app-header';
-import AdminSidebar from '@/components/admin-sidebar';
+import AppSidebar from '@/components/layout/app-sidebar';
 import { cn } from '@/lib/utils';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -13,7 +13,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 	return (
 		<div className='flex min-h-screen w-full flex-col bg-muted/40'>
 			{/* Sidebar para móviles (overlay) y para desktop (fijo) */}
-			<AdminSidebar
+			<AppSidebar
 				onMenuClick={toggleSidebar}
 				className={cn(
 					'fixed inset-y-0 left-0 z-50 h-full w-64 transform transition-transform duration-300 ease-in-out lg:translate-x-0',

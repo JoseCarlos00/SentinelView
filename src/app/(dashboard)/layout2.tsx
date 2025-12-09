@@ -1,5 +1,5 @@
 import type React from 'react';
-import AdminSidebar from '@/components/admin-sidebar';
+import AppSidebar from '@/components/layout/app-sidebar';
 import InventoryHeader from '@/components/layout/app-header-1';
 import { AuthStateSync } from '@/components/auth-state-sync';
 
@@ -19,7 +19,7 @@ export default async function ProtectedLayout({
 	return (
 		<div className='flex h-screen'>
 			{/* <AuthStateSync accessToken={accessToken} /> */}
-			<AdminSidebar currentUser={{ username: currentUser.username, role: currentUser.role }} />
+			<AppSidebar currentUser={{ username: currentUser.username, role: currentUser.role }} />
 
 			<div className='flex flex-1 flex-col overflow-hidden  lg:ml-64'>
 				<InventoryHeader currentUser={{ username: currentUser.username, role: currentUser.role }} />
