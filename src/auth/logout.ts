@@ -3,10 +3,17 @@ import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from '@/lib/const
 import Cookies from 'js-cookie';
 import { logClient } from '@/lib/client-logger';
 
+const BACKEND_URL = process.env.BACKEND_API_URL || 'http://localhost:9001';
+
 export async function logout() {
 	try {
-		await fetch('/api/auth/logout', {
+		await fetch(`${BACKEND_URL}/api/auth/logout`, {
 			method: 'POST',
+			credentials: 'include', // IMPORTANTE para que la cookie viaje
+			headers: {
+				Cookie: `${REFRESH_TOKEN_COOKIE_NAME}=${Cookies.get(REFRESH_TOKEN_COOKIE_NAME)}`,
+			},
+			keepalive: true, // Asegura que la petición se complete incluso si la página se cierra
 		});
 	} catch (error) {
 		logClient('error', 'La llamada al endpoint de logout falló', { error });

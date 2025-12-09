@@ -9,5 +9,5 @@ export async function login(username: string, password: string) {
 	if (!res.ok) throw new Error('Credenciales inválidas');
 
 	const data = await res.json();
-	return data.accessToken;
+	return data;
 }

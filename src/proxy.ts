@@ -1,136 +1,177 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+
 import { apiLogger as logger } from '@/lib/logger';
-import { refreshTokenOnServer } from '@/lib/server-utils';
 import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from '@/lib/constants';
 
-// Función para decodificar el payload de un JWT (sin verificar firma)
-function getPayloadFromToken(token: string) {
-	try {
-		const payloadBase64 = token.split('.')[1];
+import { Role as UserRole } from '@/types/user';
+import { getUserFromToken } from '@/proxy/utils';
+import { ROLE_PROTECTED_ROUTES, PUBLIC_PATHS } from '@/proxy/constants';
 
-		// 1. Decodifica la Base64 URL-safe. Reemplaza '-' por '+' y '_' por '/'
-		// y añade el padding '=' si es necesario, para que Buffer lo decodifique correctamente.
-		const base64 = payloadBase64.replace(/-/g, '+').replace(/_/g, '/');
 
-		// 2. Utiliza Buffer de Node.js para decodificar la Base64
-		const decodedPayloadString = Buffer.from(base64, 'base64').toString('utf8');
+/**
+ * Verifica si una ruta requiere un rol específico y si el usuario tiene permiso.
+ */
+function checkRoutePermission(pathname: string, userRole: UserRole): { isProtected: boolean; hasAccess: boolean; } {
+	// Buscar si la ruta coincide con alguna ruta protegida
+	const protectedRoute = ROLE_PROTECTED_ROUTES.find((route) => pathname.startsWith(route.path));
 
-		// 3. Parsea la cadena JSON
-		const payload = JSON.parse(decodedPayloadString);
-
-		return payload;
-	} catch (error) {
-		logger.error('Error al decodificar el payload del token.', { error });
-		return null;
+	// Si no está en rutas protegidas, permitir acceso por defecto
+	if (!protectedRoute) {
+		return { isProtected: false, hasAccess: true };
 	}
+
+	// Verificar si el rol del usuario está en la lista de roles permitidos
+	const hasAccess = protectedRoute.allowedRoles.includes(userRole);
+
+	return { isProtected: true, hasAccess };
 }
 
-// Lógica para la autenticación de PÁGINAS
+/**
+ * Verifica si una ruta es pública (no requiere autenticación).
+ */
+function isPublicPath(pathname: string): boolean {
+	return PUBLIC_PATHS.some((path) => pathname.startsWith(path));
+}
+
+
+
 async function handlePageAuth(request: NextRequest) {
 	const { pathname, searchParams } = request.nextUrl;
 	const accessTokenValue = request.cookies.get(ACCESS_TOKEN_COOKIE_NAME)?.value;
 	const refreshTokenValue = request.cookies.get(REFRESH_TOKEN_COOKIE_NAME)?.value;
 
-	// 1. Si el usuario está autenticado (tiene refresh token) y va a /login, redirigir a la raíz.
-	//    Se excluye si viene de un error para evitar bucles.
+	// 1. Si el usuario está autenticado y va a /login (sin error), redirigir a raíz
 	if (refreshTokenValue && pathname === '/login' && !searchParams.has('error')) {
+		logger.info('Usuario autenticado intenta acceder a /login, redirigiendo a /');
 		return NextResponse.redirect(new URL('/', request.url));
 	}
 
-	// 2. Si el usuario no está autenticado (no tiene refresh token) y no está en /login, redirigir a /login.
-	if (!refreshTokenValue && pathname !== '/login') {
+	// 2. Si el usuario no está autenticado y no está en página pública, redirigir a /login
+	if (!refreshTokenValue && !isPublicPath(pathname)) {
+		logger.info('Usuario no autenticado intenta acceder a ruta protegida', { pathname });
 		return NextResponse.redirect(new URL('/login', request.url));
 	}
 
-	const payload = accessTokenValue ? getPayloadFromToken(accessTokenValue) : null;
-	const isExpired = !payload || Date.now() >= payload.exp * 1000;
+	// 3. Si el usuario está autenticado, verificar permisos de rol
+	if (accessTokenValue) {
+		const payload = getUserFromToken(accessTokenValue);
 
-	// 3. Si el usuario tiene un access token y no está expirado, permitir el paso.
-	if (accessTokenValue && !isExpired) {
-		return NextResponse.next();
-	}
-
-	// 4. Si el usuario tiene un refresh token pero el access token falta o ha expirado, intentar refrescarlo.
-	if (refreshTokenValue) {
-		try {
-			const { newAccessToken, newCookies } = await refreshTokenOnServer();
-
-			// 4a. Si el refresco falla (token de refresco inválido), redirigir a login y limpiar cookies.
-			if (!newAccessToken) {
-				const response = NextResponse.redirect(new URL('/login?error=session_expired', request.url));
-				response.cookies.delete(ACCESS_TOKEN_COOKIE_NAME);
-				response.cookies.delete(REFRESH_TOKEN_COOKIE_NAME);
-				return response;
-			}
-
-			// 4b. Si el refresco es exitoso, preparamos la continuación de la petición.
-			//     Primero, creamos una nueva cabecera para la petición que continuará al renderizado.
-			const requestHeaders = new Headers(request.headers);
-			requestHeaders.set('Cookie', `${ACCESS_TOKEN_COOKIE_NAME}=${newAccessToken}`);
-
-			// Creamos una respuesta que continúa a la página solicitada, pero con las cabeceras de la petición actualizadas.
-			const response = NextResponse.next({ request: { headers: requestHeaders } });
-
-			// Adjuntamos a la RESPUESTA las cookies que el backend nos dio para que el NAVEGADOR se actualice.
-			if (newCookies) { // newCookies contiene el string 'Set-Cookie' del backend
-				response.headers.set('Set-Cookie', newCookies);
-			}
-			return response;
-		} catch (error) {
-			logger.error('Error en el proxy al intentar refrescar el token:', { error });
-			// En caso de un error inesperado, es más seguro redirigir al login.
-			return NextResponse.redirect(new URL('/login?error=proxy_error', request.url));
+		if (!payload) {
+			logger.warn('Token de acceso inválido, redirigiendo a /login');
+			return NextResponse.redirect(new URL('/login', request.url));
 		}
+
+		const { isProtected, hasAccess } = checkRoutePermission(pathname, payload.role);
+
+		if (isProtected && !hasAccess) {
+			logger.warn('Acceso denegado por rol', {
+				pathname,
+				userRole: payload.role,
+				username: payload.username,
+			});
+
+			// Redirigir a página de acceso denegado
+			return NextResponse.redirect(new URL('/forbidden', request.url));
+		}
+
+		// Si tiene acceso, agregar información del usuario al header (opcional)
+		const response = NextResponse.next();
+		response.headers.set('X-User-Role', payload.role);
+		response.headers.set('X-User-Id', payload.id);
+
+		return response;
 	}
 
 	return NextResponse.next();
 }
 
-// Lógica para la autorización de RUTAS DE API
+
 async function handleApiAuth(request: NextRequest) {
+	const { pathname } = request.nextUrl;
 	const accessToken = request.cookies.get(ACCESS_TOKEN_COOKIE_NAME)?.value;
 
+	// 1. Verificar que existe el token
 	if (!accessToken) {
-		return NextResponse.json({ message: 'No autenticado: se requiere token de acceso.' }, { status: 401 });
+		logger.warn('API: No se proporcionó token de acceso', { pathname });
+		return NextResponse.json(
+			{
+				success: false,
+				message: 'No autenticado: se requiere token de acceso.',
+				error: 'UNAUTHORIZED',
+			},
+			{ status: 401 }
+		);
 	}
 
+	// 2. Decodificar token
+	const payload = getUserFromToken(accessToken);
 
-	const payload = getPayloadFromToken(accessToken);
-
-	if (!payload || payload.role !== 'SUPER_ADMIN') {
-		return NextResponse.json({ message: 'Acceso denegado: se requiere rol de SUPER_ADMIN.' }, { status: 403 });
+	if (!payload) {
+		logger.warn('API: Token inválido', { pathname });
+		return NextResponse.json(
+			{
+				success: false,
+				message: 'Token inválido.',
+				error: 'INVALID_TOKEN',
+			},
+			{ status: 401 }
+		);
 	}
 
-	return NextResponse.next();
+	// 3. Verificar permisos de rol para la ruta de API
+	const { isProtected, hasAccess } = checkRoutePermission(pathname, payload.role);
+
+	if (isProtected && !hasAccess) {
+		logger.warn('API: Acceso denegado por rol', {
+			pathname,
+			userRole: payload.role,
+			username: payload.username,
+		});
+
+		return NextResponse.json(
+			{
+				success: false,
+				message: `Acceso denegado: se requiere uno de los siguientes roles: ${ROLE_PROTECTED_ROUTES.find((r) =>
+					pathname.startsWith(r.path)
+				)?.allowedRoles.join(', ')}`,
+				error: 'FORBIDDEN',
+				currentRole: payload.role,
+			},
+			{ status: 403 }
+		);
+	}
+
+	// 4. Si tiene acceso, agregar información del usuario al request
+	const response = NextResponse.next();
+	response.headers.set('X-User-Role', payload.role);
+	response.headers.set('X-User-Id', payload.id);
+	response.headers.set('X-Username', payload.username);
+
+	return response;
 }
 
-// Esta es la función principal que Next.js ejecutará.
-// Actúa como un despachador que decide qué lógica aplicar según la ruta.
+
 export async function proxy(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
-	// Lista de rutas que no requieren autenticación
-	const publicPaths = ['/login', '/api/auth/login', '/api/log'];
-
-	// Si la ruta está en la lista pública, no hacemos nada
-	if (publicPaths.some((path) => pathname.startsWith(path))) {
+	// 1. Permitir acceso sin verificación a rutas públicas
+	if (isPublicPath(pathname)) {
 		return NextResponse.next();
 	}
 
-	// Si la ruta es para la API de administración, aplica la lógica de autorización de API.
-	if (pathname.startsWith('/api/admin')) {
+	// 2. Rutas de API -> Lógica de autorización de API
+	if (pathname.startsWith('/api/')) {
 		return handleApiAuth(request);
 	}
 
-	// Para el resto de rutas (páginas), aplica la lógica de autenticación de páginas.
+	// 3. Rutas de páginas -> Lógica de autenticación de páginas
 	return handlePageAuth(request);
 }
 
 export const config = {
 	matcher: [
-		// Ejecuta el middleware en todas las rutas excepto las que son para archivos estáticos.
-		// La lógica interna del middleware se encargará de las rutas públicas.
+		// Ejecuta el proxy en todas las rutas excepto archivos estáticos
 		'/((?!_next/static|_next/image|favicon.ico).*)',
 	],
 };

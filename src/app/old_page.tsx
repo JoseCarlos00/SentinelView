@@ -71,7 +71,7 @@ export default function AlertScannerDashboard() {
 	const addLog = (message: string, type: LogEntry['type'] = 'info') => {
 		const newLog: LogEntry = {
 			id: Date.now().toString(),
-			timestamp: new Date().toLocaleTimeString(),
+			timestamp: new Date().toISOString(),
 			message,
 			type,
 		};
