@@ -1,6 +1,6 @@
 'use client';
 
-import { useUser } from '@/store/use-user'; // Asumiendo que tienes este context
+import { useUser } from '@/hooks/use-user'; // Asumiendo que tienes este context
 
 import { UserRole, getRoleBadgeColor, getRoleDisplayName } from '@/lib/auth/roles';
 

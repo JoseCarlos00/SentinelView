@@ -1,6 +1,6 @@
 'use client';
 
-import { useUser } from '@/store/use-user';
+import { useUser } from '@/hooks/use-user';
 import RoleBadge from '@/components/auth/role-badge';
 import { UserRole } from '@/lib/auth/roles';
 

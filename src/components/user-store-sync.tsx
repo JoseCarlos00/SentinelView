@@ -1,6 +1,6 @@
 'use client'
 
-import { useUser } from "@/store/use-user";
+import { useUser } from "@/hooks/use-user";
 import { User } from "@/types/user";
 
 export default function UserProvider({ initialUser }: { initialUser: User | null }) {
