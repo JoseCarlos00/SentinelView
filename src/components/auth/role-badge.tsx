@@ -51,7 +51,7 @@ export function usePermission(permission: string): boolean {
 
 	if (!user) return false;
 
-	const { hasPermission } = require('@/auth/roles');
+	const { hasPermission } = require('@/lib/auth/roles');
 	return hasPermission(user.role as UserRole, permission);
 }
 
@@ -60,7 +60,7 @@ export function useHasRole(requiredRole: UserRole): boolean {
 
 	if (!user) return false;
 
-	const { hasEqualOrHigherRole } = require('@/auth/roles');
+	const { hasEqualOrHigherRole } = require('@/lib/auth/roles');
 	return hasEqualOrHigherRole(user.role as UserRole, requiredRole);
 }
 
