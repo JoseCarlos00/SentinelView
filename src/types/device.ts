@@ -18,6 +18,11 @@ export interface Device {
 	correo: string;
 	aliasUsuario: string | null;
 	ip: string;
+	ipAddress?: string;
 	macAddress: string;
+	online?: boolean;
+	battery?: number;
+	lastSeen?: string;
+	location?: string;
 	isConnected: boolean;
 }

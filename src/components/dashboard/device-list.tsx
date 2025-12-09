@@ -35,21 +35,9 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { Device } from '@/types'
 
-// ============================================
-// TIPOS
-// ============================================
 
-interface Device {
-	id: string;
-	name: string;
-	model: string;
-	online: boolean;
-	battery?: number;
-	lastSeen?: string;
-	location?: string;
-	ipAddress?: string;
-}
 
 interface DeviceListProps {
 	initialDevices: Device[];
@@ -71,6 +59,7 @@ export default function DeviceList({ initialDevices }: DeviceListProps) {
 	const { toast } = useToast();
 	const canLocate = usePermission('locate_devices');
 	const canManage = usePermission('manage_devices');
+
 
 	// ============================================
 	// WEBSOCKET CONNECTION
@@ -132,10 +121,13 @@ export default function DeviceList({ initialDevices }: DeviceListProps) {
 
 	useEffect(() => {
 		const filtered = devices.filter(device =>
-			device.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			device.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			device.usuario.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			device.modelo.toLowerCase().includes(searchTerm.toLowerCase()) ||
 			device.location?.toLowerCase().includes(searchTerm.toLowerCase())
 		);
+
+		console.log({devices, filtered});
+		
 		setFilteredDevices(filtered);
 	}, [searchTerm, devices]);
 
@@ -173,7 +165,7 @@ export default function DeviceList({ initialDevices }: DeviceListProps) {
 			if (response.data.success) {
 				toast({
 					title: '🔔 Alarma Activada',
-					description: `Localizando ${device.name}`,
+					description: `Localizando ${device.equipo}`,
 				});
 
 				if (socket) {
@@ -210,76 +202,76 @@ export default function DeviceList({ initialDevices }: DeviceListProps) {
 	// ============================================
 
 	return (
-		<div className="space-y-6">
+		<div className='space-y-6'>
 			{/* Tarjetas de Estadísticas */}
-			<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+			<div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
 				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Dispositivos</CardTitle>
-						<Wifi className="h-4 w-4 text-muted-foreground" />
+					<CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+						<CardTitle className='text-sm font-medium'>Total Dispositivos</CardTitle>
+						<Wifi className='h-4 w-4 text-muted-foreground' />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">{devices.length}</div>
-						<p className="text-xs text-muted-foreground">Equipos RF registrados</p>
+						<div className='text-2xl font-bold'>{devices.length}</div>
+						<p className='text-xs text-muted-foreground'>Equipos RF registrados</p>
 					</CardContent>
 				</Card>
 
 				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">En Línea</CardTitle>
-						<Wifi className="h-4 w-4 text-green-600" />
+					<CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+						<CardTitle className='text-sm font-medium'>En Línea</CardTitle>
+						<Wifi className='h-4 w-4 text-green-600' />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold text-green-600">{onlineCount}</div>
-						<p className="text-xs text-muted-foreground">
+						<div className='text-2xl font-bold text-green-600'>{onlineCount}</div>
+						<p className='text-xs text-muted-foreground'>
 							{((onlineCount / devices.length) * 100).toFixed(0)}% activos
 						</p>
 					</CardContent>
 				</Card>
 
 				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Fuera de Línea</CardTitle>
-						<WifiOff className="h-4 w-4 text-red-600" />
+					<CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+						<CardTitle className='text-sm font-medium'>Fuera de Línea</CardTitle>
+						<WifiOff className='h-4 w-4 text-red-600' />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold text-red-600">{offlineCount}</div>
-						<p className="text-xs text-muted-foreground">
+						<div className='text-2xl font-bold text-red-600'>{offlineCount}</div>
+						<p className='text-xs text-muted-foreground'>
 							{((offlineCount / devices.length) * 100).toFixed(0)}% inactivos
 						</p>
 					</CardContent>
 				</Card>
 
 				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Batería Promedio</CardTitle>
-						<Battery className="h-4 w-4 text-muted-foreground" />
+					<CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+						<CardTitle className='text-sm font-medium'>Batería Promedio</CardTitle>
+						<Battery className='h-4 w-4 text-muted-foreground' />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">{avgBattery.toFixed(0)}%</div>
-						<p className="text-xs text-muted-foreground">Nivel de carga</p>
+						<div className='text-2xl font-bold'>{avgBattery.toFixed(0)}%</div>
+						<p className='text-xs text-muted-foreground'>Nivel de carga</p>
 					</CardContent>
 				</Card>
 			</div>
 
 			{/* Barra de Búsqueda y Acciones */}
-			<div className="flex items-center justify-between gap-4">
-				<div className="relative flex-1 max-w-sm">
-					<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+			<div className='flex items-center justify-between gap-4'>
+				<div className='relative flex-1 max-w-sm'>
+					<Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4' />
 					<Input
-						type="text"
-						placeholder="Buscar por nombre, modelo o ubicación..."
+						type='text'
+						placeholder='Buscar por nombre, modelo o ubicación...'
 						value={searchTerm}
 						onChange={(e) => setSearchTerm(e.target.value)}
-						className="pl-10"
+						className='pl-10'
 					/>
 				</div>
 
 				<Button
 					onClick={handleRefresh}
 					disabled={loading}
-					variant="outline"
-					size="default"
+					variant='outline'
+					size='default'
 				>
 					<RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
 					Actualizar
@@ -298,10 +290,10 @@ export default function DeviceList({ initialDevices }: DeviceListProps) {
 					{loading ? (
 						<DeviceListSkeleton />
 					) : filteredDevices.length === 0 ? (
-						<div className="text-center py-12">
-							<WifiOff className="mx-auto h-12 w-12 text-muted-foreground" />
-							<h3 className="mt-4 text-lg font-semibold">No se encontraron dispositivos</h3>
-							<p className="text-sm text-muted-foreground mt-2">
+						<div className='text-center py-12'>
+							<WifiOff className='mx-auto h-12 w-12 text-muted-foreground' />
+							<h3 className='mt-4 text-lg font-semibold'>No se encontraron dispositivos</h3>
+							<p className='text-sm text-muted-foreground mt-2'>
 								{searchTerm ? 'Intenta con otro término de búsqueda' : 'No hay dispositivos registrados'}
 							</p>
 						</div>
@@ -315,88 +307,83 @@ export default function DeviceList({ initialDevices }: DeviceListProps) {
 									<TableHead>Ubicación</TableHead>
 									<TableHead>Batería</TableHead>
 									<TableHead>IP</TableHead>
-									<TableHead className="text-right">Acciones</TableHead>
+									<TableHead className='text-right'>Acciones</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
 								{filteredDevices.map((device) => (
 									<TableRow key={device.id}>
 										<TableCell>
-											<Badge 
-												variant={device.online ? 'default' : 'destructive'}
-												className={device.online ? 'bg-green-500' : ''}
+											<Badge
+												variant={device.isConnected ? 'default' : 'destructive'}
+												className={device.isConnected ? 'bg-green-500' : ''}
 											>
-												{device.online ? (
+												{device.isConnected ? (
 													<>
-														<Wifi className="h-3 w-3 mr-1" />
+														<Wifi className='h-3 w-3 mr-1' />
 														Online
 													</>
 												) : (
 													<>
-														<WifiOff className="h-3 w-3 mr-1" />
+														<WifiOff className='h-3 w-3 mr-1' />
 														Offline
 													</>
 												)}
 											</Badge>
 										</TableCell>
-										<TableCell className="font-medium">{device.name}</TableCell>
-										<TableCell className="text-muted-foreground">{device.model}</TableCell>
+										<TableCell className='font-medium'>{device.equipo}</TableCell>
+										<TableCell className='text-muted-foreground'>{device.modelo}</TableCell>
 										<TableCell>
 											{device.location ? (
-												<div className="flex items-center text-sm">
-													<MapPin className="h-3 w-3 mr-1" />
+												<div className='flex items-center text-sm'>
+													<MapPin className='h-3 w-3 mr-1' />
 													{device.location}
 												</div>
 											) : (
-												<span className="text-muted-foreground">-</span>
+												<span className='text-muted-foreground'>-</span>
 											)}
 										</TableCell>
 										<TableCell>
 											{device.battery !== undefined ? (
-												<div className="flex items-center gap-2">
-													<Battery 
+												<div className='flex items-center gap-2'>
+													<Battery
 														className={`h-4 w-4 ${
-															device.battery > 50 ? 'text-green-600' :
-															device.battery > 20 ? 'text-yellow-600' :
-															'text-red-600'
+															device.battery > 50
+																? 'text-green-600'
+																: device.battery > 20
+																? 'text-yellow-600'
+																: 'text-red-600'
 														}`}
 													/>
-													<span className="text-sm">{device.battery}%</span>
+													<span className='text-sm'>{device.battery}%</span>
 												</div>
 											) : (
-												<span className="text-muted-foreground">-</span>
+												<span className='text-muted-foreground'>-</span>
 											)}
 										</TableCell>
-										<TableCell className="text-sm text-muted-foreground">
-											{device.ipAddress || '-'}
-										</TableCell>
-										<TableCell className="text-right">
+										<TableCell className='text-sm text-muted-foreground'>{device.ipAddress || '-'}</TableCell>
+										<TableCell className='text-right'>
 											<DropdownMenu>
 												<DropdownMenuTrigger asChild>
-													<Button variant="ghost" size="sm">
+													<Button
+														variant='ghost'
+														size='sm'
+													>
 														•••
 													</Button>
 												</DropdownMenuTrigger>
-												<DropdownMenuContent align="end">
+												<DropdownMenuContent align='end'>
 													<DropdownMenuLabel>Acciones</DropdownMenuLabel>
 													<DropdownMenuSeparator />
-													<DropdownMenuItem onClick={() => handleViewDetails(device)}>
-														Ver Detalles
-													</DropdownMenuItem>
+													<DropdownMenuItem onClick={() => handleViewDetails(device)}>Ver Detalles</DropdownMenuItem>
 													{canLocate && device.online && (
-														<DropdownMenuItem onClick={() => handleLocate(device)}>
-															🔔 Localizar
-														</DropdownMenuItem>
+														<DropdownMenuItem onClick={() => handleLocate(device)}>🔔 Localizar</DropdownMenuItem>
 													)}
 													{canManage && (
 														<>
-															<DropdownMenuItem>
-																⚙️ Configurar
-															</DropdownMenuItem>
+															<DropdownMenuItem>⚙️ Configurar</DropdownMenuItem>
 															<DropdownMenuSeparator />
-															<DropdownMenuItem className="text-red-600">
-																🗑️ Eliminar
-															</DropdownMenuItem>
+															<DropdownMenuItem className='text-red-600'>🗑️ Eliminar</DropdownMenuItem>
 														</>
 													)}
 												</DropdownMenuContent>
@@ -411,56 +398,55 @@ export default function DeviceList({ initialDevices }: DeviceListProps) {
 			</Card>
 
 			{/* Dialog de Detalles */}
-			<Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-				<DialogContent className="max-w-md">
+			<Dialog
+				open={isDetailOpen}
+				onOpenChange={setIsDetailOpen}
+			>
+				<DialogContent className='max-w-md'>
 					<DialogHeader>
 						<DialogTitle>Detalles del Dispositivo</DialogTitle>
-						<DialogDescription>
-							Información completa de {selectedDevice?.name}
-						</DialogDescription>
+						<DialogDescription>Información completa de {selectedDevice?.equipo}</DialogDescription>
 					</DialogHeader>
 					{selectedDevice && (
-						<div className="space-y-4 py-4">
-							<div className="flex items-center justify-between">
-								<span className="text-sm font-medium">Estado:</span>
+						<div className='space-y-4 py-4'>
+							<div className='flex items-center justify-between'>
+								<span className='text-sm font-medium'>Estado:</span>
 								<Badge variant={selectedDevice.online ? 'default' : 'destructive'}>
 									{selectedDevice.online ? 'Online' : 'Offline'}
 								</Badge>
 							</div>
-							<div className="flex items-center justify-between">
-								<span className="text-sm font-medium">Nombre:</span>
-								<span className="text-sm">{selectedDevice.name}</span>
+							<div className='flex items-center justify-between'>
+								<span className='text-sm font-medium'>Nombre:</span>
+								<span className='text-sm'>{selectedDevice.equipo}</span>
 							</div>
-							<div className="flex items-center justify-between">
-								<span className="text-sm font-medium">Modelo:</span>
-								<span className="text-sm">{selectedDevice.model}</span>
+							<div className='flex items-center justify-between'>
+								<span className='text-sm font-medium'>Modelo:</span>
+								<span className='text-sm'>{selectedDevice.modelo}</span>
 							</div>
-							<div className="flex items-center justify-between">
-								<span className="text-sm font-medium">IP:</span>
-								<span className="text-sm font-mono">{selectedDevice.ipAddress || 'N/A'}</span>
+							<div className='flex items-center justify-between'>
+								<span className='text-sm font-medium'>IP:</span>
+								<span className='text-sm font-mono'>{selectedDevice.ipAddress || 'N/A'}</span>
 							</div>
-							<div className="flex items-center justify-between">
-								<span className="text-sm font-medium">Ubicación:</span>
-								<span className="text-sm">{selectedDevice.location || 'Desconocida'}</span>
+							<div className='flex items-center justify-between'>
+								<span className='text-sm font-medium'>Ubicación:</span>
+								<span className='text-sm'>{selectedDevice.location || 'Desconocida'}</span>
 							</div>
-							<div className="flex items-center justify-between">
-								<span className="text-sm font-medium">Batería:</span>
-								<span className="text-sm">{selectedDevice.battery || 0}%</span>
+							<div className='flex items-center justify-between'>
+								<span className='text-sm font-medium'>Batería:</span>
+								<span className='text-sm'>{selectedDevice.battery || 0}%</span>
 							</div>
-							<div className="flex items-center justify-between">
-								<span className="text-sm font-medium">Última conexión:</span>
-								<span className="text-sm text-muted-foreground">
-									{selectedDevice.lastSeen || 'Ahora'}
-								</span>
+							<div className='flex items-center justify-between'>
+								<span className='text-sm font-medium'>Última conexión:</span>
+								<span className='text-sm text-muted-foreground'>{selectedDevice.lastSeen || 'Ahora'}</span>
 							</div>
-							
+
 							{canLocate && selectedDevice.online && (
-								<Button 
+								<Button
 									onClick={() => {
 										handleLocate(selectedDevice);
 										setIsDetailOpen(false);
 									}}
-									className="w-full"
+									className='w-full'
 								>
 									🔔 Localizar Dispositivo
 								</Button>
