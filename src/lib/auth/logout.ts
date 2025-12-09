@@ -1,25 +1,33 @@
-import { useAuth } from '@/store/use-auth';
-import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from '@/lib/constants';
-import Cookies from 'js-cookie';
 import { logClient } from '@/lib/logging/client-logger';
+import { useUser } from '@/hooks/use-user';
 
-const BACKEND_URL = process.env.BACKEND_API_URL || 'http://localhost:9001';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-export async function logout() {
+/**
+ * Cierra sesión del usuario
+ * Las cookies httpOnly se limpian automáticamente por el backend
+ */
+export async function logout(): Promise<void> {
 	try {
-		await fetch(`${BACKEND_URL}/api/auth/logout`, {
+		const response = await fetch(`${BACKEND_URL}/api/auth/logout`, {
 			method: 'POST',
-			credentials: 'include', // IMPORTANTE para que la cookie viaje
+			credentials: 'include', // ⭐ Esto envía las cookies automáticamente
 			headers: {
-				Cookie: `${REFRESH_TOKEN_COOKIE_NAME}=${Cookies.get(REFRESH_TOKEN_COOKIE_NAME)}`,
+				'Content-Type': 'application/json',
 			},
-			keepalive: true, // Asegura que la petición se complete incluso si la página se cierra
 		});
+
+		if (!response.ok) {
+			logClient('warn', 'El backend respondió con error en logout', {
+				status: response.status,
+			});
+		}
+
+		logClient('info', 'Logout exitoso');
 	} catch (error) {
-		logClient('error', 'La llamada al endpoint de logout falló', { error });
+		logClient('error', 'Error en llamada a logout, limpiando estado local', { error });
 	} finally {
-		useAuth.getState().setToken(null);
-		Cookies.remove(ACCESS_TOKEN_COOKIE_NAME);
-		Cookies.remove(REFRESH_TOKEN_COOKIE_NAME);
+		useUser.setState({ user: null });
+		logClient('info', 'Estado local limpiado');
 	}
 }

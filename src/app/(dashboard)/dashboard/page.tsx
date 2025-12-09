@@ -5,7 +5,7 @@ import { UserRole } from '@/lib/auth/roles';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { InfoIcon } from 'lucide-react';
-import MinHeader from '@/components/dashboard/min-header'
+import { Button } from '@/components/ui/button';
 
 // ============================================
 // TIPOS
@@ -69,10 +69,7 @@ export default async function DashboardPage() {
 	const initialDevices = await getInitialDevices();
 
 	return (
-		<div className='min-h-screen bg-gray-50'>
-			{/* Header */}
-			<MinHeader />
-
+		<div className='min-h-screen bg-background'>
 			{/* Contenido Principal */}
 			<main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
 				<div className='space-y-8'>
@@ -142,21 +139,21 @@ function ReportsSection() {
 			</CardHeader>
 			<CardContent>
 				<div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-					<div className='p-4 border rounded-lg'>
+					<div className='p-4 border rounded-lg bg-muted/50'>
 						<h3 className='text-sm font-medium text-muted-foreground'>Dispositivos Localizados (Hoy)</h3>
 						<p className='text-3xl font-bold mt-2'>42</p>
 						<p className='text-xs text-muted-foreground mt-1'>+12% vs ayer</p>
 					</div>
 
-					<div className='p-4 border rounded-lg'>
+					<div className='p-4 border rounded-lg bg-muted/50'>
 						<h3 className='text-sm font-medium text-muted-foreground'>Tiempo Promedio de Localización</h3>
 						<p className='text-3xl font-bold mt-2'>2.3m</p>
 						<p className='text-xs text-muted-foreground mt-1'>-8% vs semana pasada</p>
 					</div>
 
-					<div className='p-4 border rounded-lg'>
+					<div className='p-4 border rounded-lg bg-muted/50'>
 						<h3 className='text-sm font-medium text-muted-foreground'>Equipos con Batería Baja</h3>
-						<p className='text-3xl font-bold mt-2 text-yellow-600'>7</p>
+						<p className='text-3xl font-bold mt-2 text-yellow-600 dark:text-yellow-400'>7</p>
 						<p className='text-xs text-muted-foreground mt-1'>Requieren carga</p>
 					</div>
 				</div>
@@ -171,7 +168,7 @@ function ReportsSection() {
 						].map((activity, i) => (
 							<div
 								key={i}
-								className='flex items-center justify-between p-3 bg-gray-50 rounded-lg text-sm'
+								className='flex items-center justify-between p-3 bg-muted/50 rounded-lg text-sm'
 							>
 								<div className='flex items-center gap-3'>
 									<span className='text-xs text-muted-foreground font-mono'>{activity.time}</span>
@@ -201,9 +198,7 @@ function UserManagementSection() {
 							<p className='font-medium'>Total de Usuarios</p>
 							<p className='text-2xl font-bold mt-1'>24</p>
 						</div>
-						<button className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition'>
-							+ Nuevo Usuario
-						</button>
+						<Button>+ Nuevo Usuario</Button>
 					</div>
 
 					<div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
@@ -244,7 +239,7 @@ function SystemConfigSection() {
 							<p className='font-medium'>Modo de Alarma</p>
 							<p className='text-sm text-muted-foreground'>Volumen máximo y vibración</p>
 						</div>
-						<button className='px-3 py-1 text-sm border rounded-md hover:bg-gray-50'>Configurar</button>
+						<Button variant='outline' size='sm'>Configurar</Button>
 					</div>
 
 					<div className='flex items-center justify-between p-3 border rounded-lg'>
@@ -252,7 +247,7 @@ function SystemConfigSection() {
 							<p className='font-medium'>Intervalo de Sincronización</p>
 							<p className='text-sm text-muted-foreground'>Actualización cada 30 segundos</p>
 						</div>
-						<button className='px-3 py-1 text-sm border rounded-md hover:bg-gray-50'>Configurar</button>
+						<Button variant='outline' size='sm'>Configurar</Button>
 					</div>
 
 					<div className='flex items-center justify-between p-3 border rounded-lg'>
@@ -260,7 +255,7 @@ function SystemConfigSection() {
 							<p className='font-medium'>Backup de Base de Datos</p>
 							<p className='text-sm text-muted-foreground'>Último backup: Hoy 02:00 AM</p>
 						</div>
-						<button className='px-3 py-1 text-sm border rounded-md hover:bg-gray-50'>Crear Backup</button>
+						<Button variant='outline' size='sm'>Crear Backup</Button>
 					</div>
 
 					<div className='flex items-center justify-between p-3 border rounded-lg'>
@@ -268,7 +263,7 @@ function SystemConfigSection() {
 							<p className='font-medium'>Logs del Sistema</p>
 							<p className='text-sm text-muted-foreground'>Ver registro de eventos</p>
 						</div>
-						<button className='px-3 py-1 text-sm border rounded-md hover:bg-gray-50'>Ver Logs</button>
+						<Button variant='outline' size='sm'>Ver Logs</Button>
 					</div>
 				</div>
 			</CardContent>

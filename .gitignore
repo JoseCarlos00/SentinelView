@@ -1,12 +1,21 @@
 # Dependencias
 # Ignora la carpeta que contiene todos los paquetes de npm/yarn/pnpm.
-/node_modules
+node_modules/
+.pnp
+.pnp.js
 
 /logs/
 *.log
 # Build
 # Ignora la carpeta de compilación de Next.js.
 /.next/
+out/
+build/
+dist/
+
+# Testing
+coverage/
+.nyc_output/
 
 # Ignora la carpeta de exportación estática.
 /out/

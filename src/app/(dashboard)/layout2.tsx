@@ -1,6 +1,6 @@
 import type React from 'react';
 import AdminSidebar from '@/components/admin-sidebar';
-import InventoryHeader from '@/components/layout/app-header';
+import InventoryHeader from '@/components/layout/app-header-1';
 import { AuthStateSync } from '@/components/auth-state-sync';
 
 export default async function ProtectedLayout({
