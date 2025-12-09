@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { cache } from 'react';
-import { Device } from '@/types/devices';
+import { Device } from '@/types/device';
 import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from './constants';
 import { apiLogger, authLogger as logger } from './logging/logger';
 

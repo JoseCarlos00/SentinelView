@@ -11,7 +11,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Device } from '@/types/devices';
+import { Device } from '@/types/device';
 
 interface ActionsMenuProps<TValue> extends HTMLAttributes<HTMLDivElement> {
 	row: Row<TValue>;

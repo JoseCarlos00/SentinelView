@@ -16,7 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Search, WifiIcon, WifiOffIcon } from 'lucide-react';
 
-import { Device } from '@/types/devices'
+import { Device } from '@/types/device'
 import { columns as deviceColumns } from '@/components/inventory/table/columns';
 import  DataTable  from '@/components/inventory/table/data-table';
 import DataTableViewOptions from '@/components/inventory/table/data-table-view-options';

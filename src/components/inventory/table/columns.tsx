@@ -1,6 +1,6 @@
 'use client';
 
-import { Device } from '@/types/devices';
+import { Device } from '@/types/device';
 import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
 import { Wifi, WifiOff } from 'lucide-react';

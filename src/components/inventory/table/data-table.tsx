@@ -2,7 +2,7 @@
 
 import { ColumnDef, Table as TableType, flexRender } from '@tanstack/react-table';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Device } from '@/types/devices';
+import { Device } from '@/types/device';
 
 interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];
