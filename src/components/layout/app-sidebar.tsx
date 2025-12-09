@@ -29,7 +29,7 @@ export default function AppSidebar({ className, onMenuClick }: AppSidebarProps) 
 						<span className="">Device Admin</span>
 					</Link>
 
-					<PanelLeftClose className="block md:hidden" onClick={onMenuClick} />
+					<PanelLeftClose className="block md:hidden size-4 cursor-pointer" onClick={onMenuClick} />
 				</div>
 				<div className="flex-1 overflow-y-auto py-2">
 					<nav className="grid items-start px-4 text-sm font-medium">
