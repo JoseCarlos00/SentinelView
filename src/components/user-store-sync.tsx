@@ -1,7 +1,7 @@
 'use client'
 
 import { useUser } from "@/hooks/use-user";
-import { User } from "@/types/user";
+import { User } from "@/types/index";
 
 export default function UserProvider({ initialUser }: { initialUser: User | null }) {
   const setUser = useUser((state) => state.setUser);
