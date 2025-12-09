@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Activity, LogOut } from 'lucide-react';
-import { logout } from '@/modules/auth/logout';
+import { logout } from '@/lib/auth/logout';
 import { useRouter } from 'next/navigation';
 
 export default function InventoryHeader({ currentUser }: { currentUser: { username: string; role: string } }) {

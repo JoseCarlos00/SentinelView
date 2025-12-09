@@ -28,41 +28,6 @@ export const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
   [UserRole.USER]: 'Acceso de solo lectura al dashboard',
 };
 
-/**
- * Permisos específicos por rol
- */
-export const ROLE_PERMISSIONS = {
-  [UserRole.SUPER_ADMIN]: [
-    'manage_users',
-    'manage_devices',
-    'view_devices',
-    'locate_devices',
-    'view_reports',
-    'system_config',
-    'view_logs',
-  ],
-  [UserRole.ADMIN]: [
-    'manage_devices',
-    'view_devices',
-    'locate_devices',
-    'view_reports',
-    'view_logs',
-  ],
-  [UserRole.OPERATOR]: [
-    'view_devices',
-    'locate_devices',
-  ],
-  [UserRole.USER]: [
-    'view_devices',
-  ],
-} as const;
-
-/**
- * Verifica si un rol tiene un permiso específico
- */
-export function hasPermission(role: UserRole, permission: string): boolean {
-  return ROLE_PERMISSIONS[role]?.includes(permission as any) ?? false;
-}
 
 /**
  * Verifica si un rol tiene mayor o igual jerarquía que otro

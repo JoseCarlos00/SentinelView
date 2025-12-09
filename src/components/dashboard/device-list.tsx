@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Search, RefreshCw, MapPin, Battery, Wifi, WifiOff } from 'lucide-react';
 import io, { Socket } from 'socket.io-client';
 import apiClient from '@/lib/api/axios-client';
-import { usePermission } from '@/components/auth/role-badge';
+import { usePermission } from '@/hooks/use-permissions';
 
 import {
 	Table,

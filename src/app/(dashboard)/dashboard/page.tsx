@@ -1,10 +1,11 @@
 import { cookies } from 'next/headers';
 import DeviceList from '@/components/dashboard/device-list';
-import { ProtectedContent } from '@/components/auth/role-badge';
+import { ProtectedContent } from '@/components/auth/protected-content';
 import { UserRole } from '@/lib/auth/roles';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { InfoIcon } from 'lucide-react';
+import MinHeader from '@/components/dashboard/min-header'
 
 // ============================================
 // TIPOS
@@ -63,22 +64,14 @@ async function getInitialDevices(): Promise<Device[]> {
 // ============================================
 
 export default async function DashboardPage() {
+	
 	// ⭐ Cargar datos en el servidor ANTES de renderizar
 	const initialDevices = await getInitialDevices();
 
 	return (
 		<div className='min-h-screen bg-gray-50'>
 			{/* Header */}
-			<header className='bg-white border-b'>
-				<div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'>
-					<div className='flex items-center justify-between'>
-						<div>
-							<h1 className='text-3xl font-bold text-gray-900'>Dashboard</h1>
-							<p className='mt-1 text-sm text-gray-500'>Sistema de localización de equipos RF</p>
-						</div>
-					</div>
-				</div>
-			</header>
+			<MinHeader />
 
 			{/* Contenido Principal */}
 			<main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>

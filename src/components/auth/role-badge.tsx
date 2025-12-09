@@ -1,7 +1,5 @@
 'use client';
 
-import { useUser } from '@/hooks/use-user'; // Asumiendo que tienes este context
-
 import { UserRole, getRoleBadgeColor, getRoleDisplayName } from '@/lib/auth/roles';
 
 interface RoleBadgeProps {
@@ -38,68 +36,4 @@ export default function RoleBadge({ role, showIcon = true, size = 'md', classNam
 			<span>{displayName}</span>
 		</span>
 	);
-}
-
-// ============================================
-// Hook para verificar permisos en componentes
-// ============================================
-
-
-
-export function usePermission(permission: string): boolean {
-	const { user } = useUser();
-
-	if (!user) return false;
-
-	const { hasPermission } = require('@/lib/auth/roles');
-	return hasPermission(user.role as UserRole, permission);
-}
-
-export function useHasRole(requiredRole: UserRole): boolean {
-	const { user } = useUser();
-
-	if (!user) return false;
-
-	const { hasEqualOrHigherRole } = require('@/lib/auth/roles');
-	return hasEqualOrHigherRole(user.role as UserRole, requiredRole);
-}
-
-// ============================================
-// Componente para proteger contenido por rol
-// ============================================
-
-interface ProtectedContentProps {
-	requiredRole: UserRole;
-	children: React.ReactNode;
-	fallback?: React.ReactNode;
-}
-
-export function ProtectedContent({ requiredRole, children, fallback = null }: ProtectedContentProps) {
-	const hasRole = useHasRole(requiredRole);
-
-	if (!hasRole) {
-		return <>{fallback}</>;
-	}
-
-	return <>{children}</>;
-}
-
-// ============================================
-// Componente para proteger contenido por permiso
-// ============================================
-
-interface ProtectedByPermissionProps {
-	permission: string;
-	children: React.ReactNode;
-	fallback?: React.ReactNode;
-}
-
-export function ProtectedByPermission({ permission, children, fallback = null }: ProtectedByPermissionProps) {
-	const hasPermission = usePermission(permission);
-
-	if (!hasPermission) {
-		return <>{fallback}</>;
-	}
-
-	return <>{children}</>;
 }
