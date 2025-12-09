@@ -1,19 +1,27 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useUser } from '@/hooks/use-user';
 import RoleBadge from '@/components/auth/role-badge';
 import { UserRole } from '@/lib/auth/roles';
 import { LogoutButton } from '../logout-button'
+import { Menu } from 'lucide-react';
+import { Button } from '../ui/button';
 
-export default function AppHeader() {
+interface AppHeaderProps {
+	onMenuClick?: () => void;
+}
+
+export default function AppHeader({ onMenuClick }: AppHeaderProps) {
 	const user = useUser((state) => state.user);
-	const router = useRouter();
 
 	return (
 		<header className='bg-card border-b border-border'>
 			<div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4'>
-				<div className='flex items-center justify-between'>
+				<div className='flex items-center justify-between h-12'>
+					<Button variant="ghost" size="icon" className="lg:hidden" onClick={onMenuClick}>
+						<Menu className="h-6 w-6" />
+						<span className="sr-only">Abrir menú</span>
+					</Button>
 					{/* Sección Izquierda: Título y Saludo */}
 					<div>
 						<h1 className='text-2xl font-bold text-foreground'>Dashboard</h1>
