@@ -7,8 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/store/use-auth';
-import { login } from '@/modules/auth/login';
+import { login } from '@/auth/login';
 import { logClient } from "@/lib/client-logger";
 
 export function LoginForm() {
@@ -25,16 +24,10 @@ export function LoginForm() {
 
 		try {
 			// Usamos la función centralizada
-			const accessToken = await login(username, password);
+			await login(username, password);
 			logClient('info', 'Intento de login exitoso', { username });
 
-			// El backend, a través del proxy de Next.js, ya ha establecido las cookies
-			// (accessToken y refreshToken) en el navegador a través de las cabeceras Set-Cookie.
-			// Por lo tanto, ya no es necesario establecer la cookie manualmente aquí.
-			useAuth.getState().setToken(accessToken);
-
-			router.push('/');
-			router.refresh();
+			window.location.href = '/dashboard';
 
 		} catch (error) {
 			// Proporcionamos un mensaje más amigable y específico.

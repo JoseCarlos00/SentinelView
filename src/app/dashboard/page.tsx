@@ -1,0 +1,284 @@
+import { cookies } from 'next/headers';
+import DeviceList from '@/components/DeviceList';
+import { ProtectedContent } from '@/components/role-badge';
+import { UserRole } from '@/auth/roles';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { InfoIcon } from 'lucide-react';
+
+// ============================================
+// TIPOS
+// ============================================
+
+interface Device {
+	id: string;
+	name: string;
+	model: string;
+	online: boolean;
+	battery?: number;
+	lastSeen?: string;
+	location?: string;
+	ipAddress?: string;
+}
+
+// ============================================
+// SERVER FUNCTION: Obtener dispositivos iniciales
+// ============================================
+
+async function getInitialDevices(): Promise<Device[]> {
+	const cookieStore = await cookies();
+	const accessToken = cookieStore.get('access_token')?.value;
+
+	if (!accessToken) {
+		console.warn('[Dashboard] No access token found');
+		return [];
+	}
+
+	try {
+		// Llamada al backend Node.js desde servidor Next.js
+		const response = await fetch('http://localhost:3000/api/devices', {
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+			cache: 'no-store', // No cachear (datos en tiempo real)
+		});
+
+		if (!response.ok) {
+			console.error('[Dashboard] Error fetching devices:', response.status);
+			return [];
+		}
+
+		const devices: Device[] = await response.json();
+		console.log(`[Dashboard] Loaded ${devices.length} devices`);
+
+		return devices;
+	} catch (error) {
+		console.error('[Dashboard] Error fetching devices:', error);
+		return [];
+	}
+}
+
+// ============================================
+// SERVER COMPONENT: Dashboard Page
+// ============================================
+
+export default async function DashboardPage() {
+	// ⭐ Cargar datos en el servidor ANTES de renderizar
+	const initialDevices = await getInitialDevices();
+
+	return (
+		<div className='min-h-screen bg-gray-50'>
+			{/* Header */}
+			<header className='bg-white border-b'>
+				<div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'>
+					<div className='flex items-center justify-between'>
+						<div>
+							<h1 className='text-3xl font-bold text-gray-900'>Dashboard</h1>
+							<p className='mt-1 text-sm text-gray-500'>Sistema de localización de equipos RF</p>
+						</div>
+					</div>
+				</div>
+			</header>
+
+			{/* Contenido Principal */}
+			<main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+				<div className='space-y-8'>
+					{/* Alerta de Bienvenida */}
+					<Alert>
+						<InfoIcon className='h-4 w-4' />
+						<AlertTitle>Sistema Activo</AlertTitle>
+						<AlertDescription>
+							Los dispositivos se actualizan en tiempo real a través de WebSocket.
+							{initialDevices.length === 0 && ' No hay dispositivos registrados actualmente.'}
+						</AlertDescription>
+					</Alert>
+
+					{/* Lista de Dispositivos (visible para todos los usuarios autenticados) */}
+					<section>
+						<DeviceList initialDevices={initialDevices} />
+					</section>
+
+					{/* Sección de Reportes (solo ADMIN y SUPER_ADMIN) */}
+					<ProtectedContent
+						requiredRole={UserRole.ADMIN}
+						fallback={
+							<Card>
+								<CardHeader>
+									<CardTitle>📊 Reportes y Análisis</CardTitle>
+									<CardDescription>Sección Restringida</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<div className='flex items-center justify-center py-8 text-muted-foreground'>
+										<div className='text-center'>
+											<p className='text-sm'>🔒 Requiere rol de Administrador o superior</p>
+											<p className='text-xs mt-2'>Contacta a tu supervisor para obtener acceso</p>
+										</div>
+									</div>
+								</CardContent>
+							</Card>
+						}
+					>
+						<ReportsSection />
+					</ProtectedContent>
+
+					{/* Sección de Gestión de Usuarios (solo SUPER_ADMIN) */}
+					<ProtectedContent requiredRole={UserRole.SUPER_ADMIN}>
+						<UserManagementSection />
+					</ProtectedContent>
+
+					{/* Sección de Configuración del Sistema (solo SUPER_ADMIN) */}
+					<ProtectedContent requiredRole={UserRole.SUPER_ADMIN}>
+						<SystemConfigSection />
+					</ProtectedContent>
+				</div>
+			</main>
+		</div>
+	);
+}
+
+// ============================================
+// COMPONENTES DE SECCIONES
+// ============================================
+
+function ReportsSection() {
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>📊 Reportes y Análisis</CardTitle>
+				<CardDescription>Estadísticas de uso y rendimiento</CardDescription>
+			</CardHeader>
+			<CardContent>
+				<div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+					<div className='p-4 border rounded-lg'>
+						<h3 className='text-sm font-medium text-muted-foreground'>Dispositivos Localizados (Hoy)</h3>
+						<p className='text-3xl font-bold mt-2'>42</p>
+						<p className='text-xs text-muted-foreground mt-1'>+12% vs ayer</p>
+					</div>
+
+					<div className='p-4 border rounded-lg'>
+						<h3 className='text-sm font-medium text-muted-foreground'>Tiempo Promedio de Localización</h3>
+						<p className='text-3xl font-bold mt-2'>2.3m</p>
+						<p className='text-xs text-muted-foreground mt-1'>-8% vs semana pasada</p>
+					</div>
+
+					<div className='p-4 border rounded-lg'>
+						<h3 className='text-sm font-medium text-muted-foreground'>Equipos con Batería Baja</h3>
+						<p className='text-3xl font-bold mt-2 text-yellow-600'>7</p>
+						<p className='text-xs text-muted-foreground mt-1'>Requieren carga</p>
+					</div>
+				</div>
+
+				<div className='mt-6'>
+					<h3 className='text-sm font-semibold mb-3'>Actividad Reciente</h3>
+					<div className='space-y-2'>
+						{[
+							{ time: '10:23', action: 'Dispositivo Zebra-045 localizado', user: 'Juan P.' },
+							{ time: '10:15', action: 'Alarma activada en Datalogic-012', user: 'María G.' },
+							{ time: '09:58', action: 'Dispositivo UROBO-087 conectado', user: 'Sistema' },
+						].map((activity, i) => (
+							<div
+								key={i}
+								className='flex items-center justify-between p-3 bg-gray-50 rounded-lg text-sm'
+							>
+								<div className='flex items-center gap-3'>
+									<span className='text-xs text-muted-foreground font-mono'>{activity.time}</span>
+									<span>{activity.action}</span>
+								</div>
+								<span className='text-xs text-muted-foreground'>{activity.user}</span>
+							</div>
+						))}
+					</div>
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
+function UserManagementSection() {
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>👥 Gestión de Usuarios</CardTitle>
+				<CardDescription>Administrar usuarios y permisos del sistema</CardDescription>
+			</CardHeader>
+			<CardContent>
+				<div className='space-y-4'>
+					<div className='flex items-center justify-between p-4 border rounded-lg'>
+						<div>
+							<p className='font-medium'>Total de Usuarios</p>
+							<p className='text-2xl font-bold mt-1'>24</p>
+						</div>
+						<button className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition'>
+							+ Nuevo Usuario
+						</button>
+					</div>
+
+					<div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+						<div className='p-4 border rounded-lg text-center'>
+							<p className='text-sm text-muted-foreground'>Super Admins</p>
+							<p className='text-2xl font-bold mt-1'>2</p>
+						</div>
+						<div className='p-4 border rounded-lg text-center'>
+							<p className='text-sm text-muted-foreground'>Admins</p>
+							<p className='text-2xl font-bold mt-1'>5</p>
+						</div>
+						<div className='p-4 border rounded-lg text-center'>
+							<p className='text-sm text-muted-foreground'>Operadores</p>
+							<p className='text-2xl font-bold mt-1'>12</p>
+						</div>
+						<div className='p-4 border rounded-lg text-center'>
+							<p className='text-sm text-muted-foreground'>Usuarios</p>
+							<p className='text-2xl font-bold mt-1'>5</p>
+						</div>
+					</div>
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
+function SystemConfigSection() {
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>⚙️ Configuración del Sistema</CardTitle>
+				<CardDescription>Ajustes avanzados y mantenimiento</CardDescription>
+			</CardHeader>
+			<CardContent>
+				<div className='space-y-3'>
+					<div className='flex items-center justify-between p-3 border rounded-lg'>
+						<div>
+							<p className='font-medium'>Modo de Alarma</p>
+							<p className='text-sm text-muted-foreground'>Volumen máximo y vibración</p>
+						</div>
+						<button className='px-3 py-1 text-sm border rounded-md hover:bg-gray-50'>Configurar</button>
+					</div>
+
+					<div className='flex items-center justify-between p-3 border rounded-lg'>
+						<div>
+							<p className='font-medium'>Intervalo de Sincronización</p>
+							<p className='text-sm text-muted-foreground'>Actualización cada 30 segundos</p>
+						</div>
+						<button className='px-3 py-1 text-sm border rounded-md hover:bg-gray-50'>Configurar</button>
+					</div>
+
+					<div className='flex items-center justify-between p-3 border rounded-lg'>
+						<div>
+							<p className='font-medium'>Backup de Base de Datos</p>
+							<p className='text-sm text-muted-foreground'>Último backup: Hoy 02:00 AM</p>
+						</div>
+						<button className='px-3 py-1 text-sm border rounded-md hover:bg-gray-50'>Crear Backup</button>
+					</div>
+
+					<div className='flex items-center justify-between p-3 border rounded-lg'>
+						<div>
+							<p className='font-medium'>Logs del Sistema</p>
+							<p className='text-sm text-muted-foreground'>Ver registro de eventos</p>
+						</div>
+						<button className='px-3 py-1 text-sm border rounded-md hover:bg-gray-50'>Ver Logs</button>
+					</div>
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
