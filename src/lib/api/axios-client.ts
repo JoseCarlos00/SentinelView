@@ -26,6 +26,11 @@ const processQueue = (error: any, token: string | null = null) => {
 	failedQueue = [];
 };
 
+const isApiRefreshCall = (config: any) => {
+	// Comprueba si la solicitud es al endpoint de refresh
+	return config.url === 'http://192.168.1.7:9001/auth/refresh';
+};
+
 // ⭐ INTERCEPTOR DE RESPUESTA (maneja 401 automáticamente)
 apiClient.interceptors.response.use(
 	// Si la respuesta es exitosa, devolverla tal cual
@@ -36,7 +41,7 @@ apiClient.interceptors.response.use(
 		const originalRequest = error.config;
 
 		// Si es 401 (Unauthorized) y no hemos intentado refrescar
-		if (error.response?.status === 401 && !originalRequest._retry) {
+		if (error.response?.status === 401 && !originalRequest._retry && !isApiRefreshCall(originalRequest)) {
 			// Si ya hay un refresh en proceso, esperar
 			if (isRefreshing) {
 				return new Promise((resolve, reject) => {

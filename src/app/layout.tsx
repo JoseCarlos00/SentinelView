@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 '@/components/ui/toaster';
 import { cookies } from 'next/headers';
 import UserProvider from '@/components/user-store-sync';
-import { ACCESS_TOKEN_COOKIE_NAME } from '@/lib/constants';
+import { REFRESH_TOKEN_COOKIE_NAME } from '@/lib/constants';
 import { Toaster } from '@/components/ui/toaster';
 import { Geist, Geist_Mono } from 'next/font/google';
 
@@ -21,11 +21,10 @@ export const metadata: Metadata = {
 
 async function getUserFromToken() {
 	const cookieStore = await cookies();
-	const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE_NAME)?.value;
-
+	const accessToken = cookieStore.get(REFRESH_TOKEN_COOKIE_NAME)?.value;
 	if (!accessToken) return null;
 
-	return verifyToken(accessToken, 'JWT_SECRET');
+	return verifyToken(accessToken, 'JWT_REFRESH_SECRET');
 }
 
 export default async function RootLayout({ children }: Readonly<{children: React.ReactNode;}>) {

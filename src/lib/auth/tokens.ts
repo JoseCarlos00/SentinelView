@@ -59,13 +59,13 @@ export function getTokenRemainingTime(token: string): number {
 	return Math.max(0, Math.floor(remainingMs / 1000));
 }
 
-type SecretKey = 'JWT_SECRET' | 'REFRESH_TOKEN_SECRET';
+type SecretKey = 'JWT_SECRET' | 'JWT_REFRESH_SECRET';
 
 export function verifyToken(token: string, secret: SecretKey): User | null {
 	try {
-		const secretValue = process.env[secret];
+		const key = process.env[secret] as string;
 
-		const payload = jwt.verify(token, secretValue!) as User;
+		const payload = jwt.verify(token, key) as User;
 		return payload;
 	} catch (error) {
 		console.error('Error verificando token:', error);

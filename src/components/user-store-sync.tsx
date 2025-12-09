@@ -6,6 +6,8 @@ import { User } from "@/types/user";
 export default function UserProvider({ initialUser }: { initialUser: User | null }) {
   const setUser = useUser((state) => state.setUser);
 
+  console.log('UserProvider:', initialUser);
+
   if (initialUser) {
     setUser(initialUser);
   }
