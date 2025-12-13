@@ -85,17 +85,17 @@ async function getInitialDevices(): Promise<Device[]> {
 
 	try {
 		// Llamada al backend Node.js desde servidor Next.js
-		// const response = await fetch('http://localhost:3000/api/devices', {
-		// 	headers: {
-		// 		Authorization: `Bearer ${accessToken}`,
-		// 	},
-		// 	cache: 'no-store', // No cachear (datos en tiempo real)
-		// });
+		const response = await fetch('http://localhost:3000/api/devices', {
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+			cache: 'no-store', // No cachear (datos en tiempo real)
+		});
 
-		// if (!response.ok) {
-		// 	console.error('[Dashboard] Error fetching devices:', response.status);
-		// 	return [];
-		// }
+		if (!response.ok) {
+			console.error('[Dashboard] Error fetching devices:', response.status);
+			return [];
+		}
 
 		// const devices: Device[] = await response.json();
 		const devices: Device[] = devicesMock;
